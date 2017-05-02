@@ -33,7 +33,7 @@
                 <MenuItem Header="Open" Command="{Binding Path=OpenArtCommand}"/>
                 <MenuItem Header="Save" Command="{Binding Path=SaveArtFileCommand}"/>
                 <MenuItem Header="Batch Process" Command="{Binding Path=BatchProcessCommand}"/>
-                <MenuItem Header="Centroid and Pelvic Area" Command="{Binding Path=BodyTestCommand}"/>
+                <MenuItem Header="Centroid Width" Command="{Binding Path=BodyTestCommand}"/>
                 <!--<MenuItem Header="Hough" Command="{Binding Path=HoughTestCommand}"/>-->
                 <MenuItem Header="Validate" Command="{Binding Path=ValidateCommand}"/>
                 <!--<MenuItem Header="Gen" Command="{Binding Path=GenCommand}"/>-->
