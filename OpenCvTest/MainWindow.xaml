@@ -1,0 +1,84 @@
+﻿<Window x:Class="AutomatedRodentTracker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviours="clr-namespace:AutomatedRodentTracker.Behaviours"
+        behaviours:WindowClosingBehavior.Closing="{Binding Path=ClosingCommand}"
+        Title="Automated Rodent Tracker" Height="720" Width="1280"
+        WindowState="Maximized">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="Image">
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding Path=DisposeCommand}" Key="D"/>
+    </Window.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="New" Command="{Binding Path=OpenVideoCommand}"/>
+                <MenuItem Header="Open" Command="{Binding Path=OpenArtCommand}"/>
+                <MenuItem Header="Save" Command="{Binding Path=SaveArtFileCommand}"/>
+                <MenuItem Header="Batch Process" Command="{Binding Path=BatchProcessCommand}"/>
+                <MenuItem Header="Centroid and Pelvic Area" Command="{Binding Path=BodyTestCommand}"/>
+                <MenuItem Header="Hough" Command="{Binding Path=HoughTestCommand}"/>
+                <MenuItem Header="Validate" Command="{Binding Path=ValidateCommand}"/>
+                <!--<MenuItem Header="Gen" Command="{Binding Path=GenCommand}"/>-->
+                <!--<MenuItem Header="Go 091119" Command="{Binding Path=GoCommand}"/>-->
+            </MenuItem>
+            <!--<MenuItem Header="Whisker">
+                <MenuItem Header="Whisker Test" Command="{Binding Path=WhiskerTestCommand}"/>
+            </MenuItem>-->
+        </Menu>
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Image HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0" Source="{Binding Path=Image}"/>
+            <TextBlock Text="{Binding Path=FrameNumberDisplay}" Grid.Column="0" VerticalAlignment="Bottom" HorizontalAlignment="Left" FontSize="16" Foreground="Red" Margin="5"/>
+            
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <ListView ItemsSource="{Binding Path=Events}" Grid.Row="0" Margin="5">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Action" Width="120" DisplayMemberBinding="{Binding Name}"/>
+                            <GridViewColumn Header="Object" Width="75" DisplayMemberBinding="{Binding BoundaryName}"/>
+                            <GridViewColumn Header="Frame" Width="50" DisplayMemberBinding="{Binding FrameNumber}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Content="Export Raw Data" Command="{Binding Path=ExportRawDataCommand}"/>
+                    <Button Content="Export interactions" Command="{Binding Path=ExportInteractionsCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        
+        <Slider Grid.Row="2" HorizontalAlignment="Stretch" Minimum="0" Maximum="{Binding Path=FrameCount}" TickFrequency="1" IsEnabled="{Binding Path=SliderEnabled}" Value="{Binding Path=CurrentFrame}" Margin="5"/>
+        
+        <!--<StackPanel Grid.Row="3" HorizontalAlignment="Center">
+            <Button Content="Next Frame" Command="{Binding Path=NextFrameCommand}"/>
+        </StackPanel>-->
+    </Grid>
+</Window>
