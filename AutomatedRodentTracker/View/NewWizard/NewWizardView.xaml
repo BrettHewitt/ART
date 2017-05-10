@@ -1,0 +1,111 @@
+﻿<Window x:Class="AutomatedRodentTracker.View.NewWizard.NewWizardView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviours="clr-namespace:AutomatedRodentTracker.Behaviours"
+        behaviours:WindowClosingBehavior.Close="{Binding Path=Close}"
+        behaviours:WindowClosingBehavior.Closing="{Binding Path=ClosingCommand}"
+        Title="Preview" Width="1280" Height="720" WindowState="Maximized">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Frame: " Grid.Row="0" Grid.Column="0"/>
+                    <Slider Grid.Row="0" Grid.Column="1" Value="{Binding Path=FrameNumber}" Maximum="{Binding Path=MaxFrame}" Margin="5"/>
+
+                    <TextBlock Text="ROI: " Grid.Row="1" Grid.Column="0"/>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                        <Button Content="Set" Command="{Binding Path=SetRoiCommand}"/>
+                        <Button Content="Remove" Command="{Binding Path=RemoveRoiCommand}"/>
+                        <Button Content="Save" Command="{Binding Path=TestCommand}"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Binary Threshold: " Grid.Row="2" Grid.Column="0"/>
+                    <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="{Binding Path=MaxThreshold}" Value="{Binding Path=ThresholdValue, Mode=TwoWay}" Margin="5"/>
+                    
+                    <TextBlock Text="Gap Distance: " Grid.Row="3" Grid.Column="0"/>
+                    <Slider Grid.Row="3" Grid.Column="1"  Minimum="0" Maximum="500" Value="{Binding Path=GapDistance, Mode=TwoWay}" Margin="5"></Slider>
+
+                    <TextBlock Text="Interaction Threshold: " Grid.Row="4" Grid.Column="0"/>
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Path=InteractionValue, Mode=TwoWay}" Margin="5" Width="40" HorizontalAlignment="Left"/>
+                    
+                    <TextBlock Text="Motion Length: " Grid.Row="5" Grid.Column="0"/>
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding Path=MotionLength, Mode=TwoWay}" Margin="5" Width="40" HorizontalAlignment="Left"/>
+
+                </Grid>
+                
+                <ListView Grid.Row="1" ItemsSource="{Binding Path=Boundries}" Margin="5">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Name" Width="120">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding Path=Name, Mode=TwoWay}" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Enabled" Width="50">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Path=Enabled, Mode=TwoWay}" Margin="5" VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Image Grid.Row="0" Source="{Binding Path=DisplayImage}"/>
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Preview" Command="{Binding Path=PreviewCommand}"/>
+            <Button Content="Ok" Command="{Binding Path=OkCommand}"/>
+            <Button Content="Cancel" Command="{Binding Path=CancelCommand}"/>
+        </StackPanel>
+        
+    </Grid>
+</Window>

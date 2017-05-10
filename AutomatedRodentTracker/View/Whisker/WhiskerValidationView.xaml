@@ -1,0 +1,33 @@
+﻿<Window x:Class="AutomatedRodentTracker.View.Whisker.WhiskerValidationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WhiskerValidationView" Height="300" Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="Open" Command="{Binding Path=OpenCommand}"/>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <!--<RowDefinition Height="*"/>-->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" Source="{Binding Path=Image1}"/>
+            <Image Grid.Row="0" Grid.Column="1" Source="{Binding Path=Image2}"/>
+            <Image Grid.Row="0" Grid.Column="2" Source="{Binding Path=Image3}"/>
+        </Grid>
+        
+        <Slider Grid.Row="2" Value="{Binding Path=SliderValue, Mode=TwoWay}" Minimum="0" Maximum="255" Margin="5"/>
+    </Grid>
+</Window>
