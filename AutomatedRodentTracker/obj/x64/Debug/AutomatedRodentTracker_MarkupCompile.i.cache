@@ -16,5 +16,5 @@ C:\Users\Brett\OneDrive\AutomatedRodentTracker\AutomatedRodentTracker\App.xaml
 22-1056212671
 MainWindow.xaml;View\BatchProcess\BatchProcessView.xaml;View\BatchProcess\Export\BatchExportView.xaml;View\BatchProcess\Review\ReviewView.xaml;View\BodyDetection\BodyDetectionView.xaml;View\Cropping\CropImageView.xaml;View\HoughLinesTest\HoughLines.xaml;View\Image\ImageViewer.xaml;View\Inputs\SingleInput.xaml;View\NewWizard\NewWizardView.xaml;View\Progress\ProgressView.xaml;View\Settings\SettingsView.xaml;View\Whisker\WhiskerValidationView.xaml;
 
-True
+False
 

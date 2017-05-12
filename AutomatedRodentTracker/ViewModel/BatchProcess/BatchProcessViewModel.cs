@@ -502,6 +502,15 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private void ProcessVideos()
         {
+            if (string.IsNullOrWhiteSpace(OutputFolder))
+            {
+                var result = MessageBox.Show("No output folder set, results will be saved in the same folder as the videos, do you wish to proceed?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
             if (!Running)
             {
                 ResetProgress();

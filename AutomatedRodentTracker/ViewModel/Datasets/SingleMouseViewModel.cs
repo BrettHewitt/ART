@@ -512,9 +512,12 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
 
         public void RunFiles(string outputLocation)
         {
-            if (!outputLocation.EndsWith("\\"))
+            if (!string.IsNullOrWhiteSpace(outputLocation))
             {
-                outputLocation += "\\";
+                if (!outputLocation.EndsWith("\\"))
+                {
+                    outputLocation += "\\";
+                }
             }
             
             Rbsk = new ConcurrentBag<IRBSKVideo>();
@@ -531,7 +534,6 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
                 string videoFile = file.VideoFileName;
                 if (string.IsNullOrWhiteSpace(outputLocation))
                 {
-
                     string extension = Path.GetExtension(videoFile);
                     artFile = videoFile.Replace(extension, ".art");
                 }
