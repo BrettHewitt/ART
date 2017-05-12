@@ -73,36 +73,47 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Text="Name: " Grid.Row="0" Grid.Column="0"/>
                     <Label Content="{Binding Path=Name}" Grid.Row="0" Grid.Column="1"/>
 
-                    <TextBlock Text="Age: " Grid.Row="1" Grid.Column="0"/>
-                    <Label Content="{Binding Path=Age}" Grid.Row="1" Grid.Column="1"/>
+                    <TextBlock Text="Distance: " Grid.Row="1" Grid.Column="0"/>
+                    <Label Content="{Binding Path=DistanceTravelled}" Grid.Row="1" Grid.Column="1"/>
 
-                    <TextBlock Text="Type: " Grid.Row="2" Grid.Column="0"/>
-                    <Label Content="{Binding Path=Type}" Grid.Row="2" Grid.Column="1"/>
+                    <TextBlock Text="Centroid Distance: " Grid.Row="2" Grid.Column="0"/>
+                    <Label Content="{Binding Path=CentroidDistanceTravelled}" Grid.Row="2" Grid.Column="1"/>
 
-                    <TextBlock Text="Distance: " Grid.Row="0" Grid.Column="2"/>
-                    <Label Content="{Binding Path=DistanceTravelled}" Grid.Row="0" Grid.Column="3"/>
+                    <TextBlock Text="Start Frame: " Grid.Row="0" Grid.Column="2"/>
+                    <Label Content="{Binding Path=AnalyseStart}" Grid.Row="1" Grid.Column="3"/>
 
-                    <TextBlock Text="Duration (frames/seconds): " Grid.Row="1" Grid.Column="2"/>
-                    <Label Content="{Binding Path=Duration}" Grid.Row="1" Grid.Column="3"/>
+                    <TextBlock Text="End Frame: " Grid.Row="1" Grid.Column="2"/>
+                    <Label Content="{Binding Path=AnalyseEnd}" Grid.Row="2" Grid.Column="3"/>
 
-                    <TextBlock Text="Average Velocity: " Grid.Row="2" Grid.Column="2"/>
-                    <Label Content="{Binding Path=AvgVelocity}" Grid.Row="2" Grid.Column="3"/>
+                    <TextBlock Text="Duration: " Grid.Row="2" Grid.Column="2"/>
+                    <Label Content="{Binding Path=Duration}" Grid.Row="0" Grid.Column="3"/>
 
                     <TextBlock Text="Average Velocity: " Grid.Row="0" Grid.Column="4"/>
                     <Label Content="{Binding Path=AvgVelocity}" Grid.Row="0" Grid.Column="5"/>
 
-                    <TextBlock Text="Average Angular Velocity: " Grid.Row="1" Grid.Column="4"/>
-                    <Label Content="{Binding Path=AvgAngularVelocity}" Grid.Row="1" Grid.Column="5"/>
+                    <TextBlock Text="Average Centroid Velocity: " Grid.Row="1" Grid.Column="4"/>
+                    <Label Content="{Binding Path=AvgCentroidVelocity}" Grid.Row="1" Grid.Column="5"/>
 
-                    <TextBlock Text="Centroid Size: " Grid.Row="2" Grid.Column="4"/>
-                    <Label Content="{Binding Path=CentroidSize}" Grid.Row="2" Grid.Column="5"/>
+                    <TextBlock Text="Average Angular Velocity: " Grid.Row="2" Grid.Column="4"/>
+                    <Label Content="{Binding Path=AvgAngularVelocity}" Grid.Row="2" Grid.Column="5"/>
 
-                    <ListView Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6" ItemsSource="{Binding Path=SelectedMouseBehaviours}" Margin="2">
+                    <TextBlock Text="Max Velocity: " Grid.Row="0" Grid.Column="6"/>
+                    <Label Content="{Binding Path=MaxVelocity}" Grid.Row="0" Grid.Column="7"/>
+
+                    <TextBlock Text="Max Centroid Velocity: " Grid.Row="1" Grid.Column="6"/>
+                    <Label Content="{Binding Path=MaxCentroidVelocity}" Grid.Row="1" Grid.Column="7"/>
+
+                    <TextBlock Text="Max Angular Velocity: " Grid.Row="2" Grid.Column="6"/>
+                    <Label Content="{Binding Path=MaxAngularVelocity}" Grid.Row="2" Grid.Column="7"/>
+
+                    <ListView Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="8" ItemsSource="{Binding Path=SelectedMouseBehaviours}" Margin="2">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Boundary" Width="120" DisplayMemberBinding="{Binding BoundaryName}"/>

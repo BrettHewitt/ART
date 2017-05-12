@@ -494,7 +494,7 @@ namespace AutomatedRodentTracker.Model.Video
             }
         }
 
-        private double m_UnitsToMilimeters;
+        private double m_UnitsToMilimeters = 1;
         public double UnitsToMilimeters
         {
             get

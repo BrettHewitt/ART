@@ -64,18 +64,12 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
         private ActionCommand m_AddTgFolderCommand;
         private ActionCommand m_RemoveTgFileCommand;
         private ActionCommand m_ClearTgFilesCommand;
-        private ActionCommand m_AddNtgFileCommand;
-        private ActionCommand m_AddNtgFolderCommand;
-        private ActionCommand m_RemoveNtgFileCommand;
-        private ActionCommand m_ClearNtgFilesCommand;
         private ActionCommand m_ProcessCommand;
-        private ActionCommand m_LoadLabbookCommand;
         private ActionCommand m_SetOutputFolderCommand;
         private ActionCommand m_LoadOutputFolderCommand;
         private ActionCommand m_ExportAllCommand;
         private ActionCommand m_BatchSettingsCommand;
         //private ActionCommandWithParameter m_ClosingCommand;
-        private ActionCommand m_ExportBatchCommand;
 
         public ActionCommand AddTgFileCommand
         {
@@ -84,6 +78,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return m_AddTgFileCommand ?? (m_AddTgFileCommand = new ActionCommand()
                 {
                     ExecuteAction = AddTgFile,
+                    CanExecuteAction = CanButtonExecute,
                 });
             }
         }
@@ -95,6 +90,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return m_AddTgFolderCommand ?? (m_AddTgFolderCommand = new ActionCommand()
                 {
                     ExecuteAction = AddTgFolder,
+                    CanExecuteAction = CanButtonExecute,
                 });
             }
         }
@@ -118,51 +114,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return m_ClearTgFilesCommand ?? (m_ClearTgFilesCommand = new ActionCommand()
                 {
                     ExecuteAction = ClearTgList,
-                });
-            }
-        }
-
-        public ActionCommand AddNtgFileCommand
-        {
-            get
-            {
-                return m_AddNtgFileCommand ?? (m_AddNtgFileCommand = new ActionCommand()
-                {
-                    ExecuteAction = AddNtgFile,
-                });
-            }
-        }
-
-        public ActionCommand AddNtgFolderCommand
-        {
-            get
-            {
-                return m_AddNtgFolderCommand ?? (m_AddNtgFolderCommand = new ActionCommand()
-                {
-                    ExecuteAction = AddNtgFolder,
-                });
-            }
-        }
-
-        public ActionCommand RemoveNtgFileCommand
-        {
-            get
-            {
-                return m_RemoveNtgFileCommand ?? (m_RemoveNtgFileCommand = new ActionCommand()
-                {
-                    ExecuteAction = RemoveNtgFile,
-                    CanExecuteAction = CanRemoveNtgFile,
-                });
-            }
-        }
-
-        public ActionCommand ClearNtgFilesCommand
-        {
-            get
-            {
-                return m_ClearNtgFilesCommand ?? (m_ClearNtgFilesCommand = new ActionCommand()
-                {
-                    ExecuteAction = ClearNtgList,
+                    CanExecuteAction = CanButtonExecute,
                 });
             }
         }
@@ -175,17 +127,6 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 {
                     ExecuteAction = ProcessVideos,
                     CanExecuteAction = CanProcessVideos,
-                });
-            }
-        }
-
-        public ActionCommand LoadLabbookCommand
-        {
-            get
-            {
-                return m_LoadLabbookCommand ?? (m_LoadLabbookCommand = new ActionCommand()
-                {
-                    ExecuteAction = LoadLabbook,
                 });
             }
         }
@@ -221,6 +162,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return m_ExportAllCommand ?? (m_ExportAllCommand = new ActionCommand()
                 {
                     ExecuteAction = ExportAll,
+                    CanExecuteAction = CanButtonExecute,
                 });
             }
         }
@@ -232,27 +174,13 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return m_BatchSettingsCommand ?? (m_BatchSettingsCommand = new ActionCommand()
                 {
                     ExecuteAction = ShowBatchSettings,
-                });
-            }
-        }
-
-        public ActionCommand ExportBatchCommand
-        {
-            get
-            {
-                return m_ExportBatchCommand ?? (m_ExportBatchCommand = new ActionCommand()
-                {
-                    ExecuteAction = ExportBatch,
-                    CanExecuteAction = CanExportBatch,
+                    CanExecuteAction = CanShowBatchSettings,
                 });
             }
         }
 
         private ObservableCollection<SingleMouseViewModel> m_TgItemsSource;
         private SingleMouseViewModel m_SelectedTgItem;
-
-        private ObservableCollection<SingleMouseViewModel> m_NtgItemsSource;
-        private SingleMouseViewModel m_SelectedNtgItem;
 
         public static object TgLock = new object();
         public ObservableCollection<SingleMouseViewModel> TgItemsSource
@@ -275,6 +203,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
                 NotifyPropertyChanged();
                 LoadOutputFolderCommand.RaiseCanExecuteChangedNotification();
+                BatchSettingsCommand.RaiseCanExecuteChangedNotification();
             }
         }
 
@@ -297,50 +226,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 RemoveTgFileCommand.RaiseCanExecuteChangedNotification();
             }
         }
-
-        public static object NtgLock = new object();
-        public ObservableCollection<SingleMouseViewModel> NtgItemsSource
-        {
-            get
-            {
-                lock (NtgLock)
-                {
-                    return m_NtgItemsSource;
-                }
-            }
-            set
-            {
-                if (Equals(m_NtgItemsSource, value))
-                {
-                    return;
-                }
-
-                m_NtgItemsSource = value;
-
-                NotifyPropertyChanged();
-                LoadOutputFolderCommand.RaiseCanExecuteChangedNotification();
-            }
-        }
-
-        public SingleMouseViewModel SelectedNtgItem
-        {
-            get
-            {
-                return m_SelectedNtgItem;
-            }
-            set
-            {
-                if (Equals(m_SelectedNtgItem, value))
-                {
-                    return;
-                }
-
-                m_SelectedNtgItem = value;
-
-                NotifyPropertyChanged();
-                RemoveNtgFileCommand.RaiseCanExecuteChangedNotification();
-            }
-        }
+        
 
         private bool m_Running = false;
         public bool Running
@@ -359,8 +245,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 m_Running = value;
 
                 NotifyPropertyChanged();
-                ProcessCommand.RaiseCanExecuteChangedNotification();
-                SetOutputFolderCommand.RaiseCanExecuteChangedNotification();
+                RaiseButtonNotifications();
             }
         }
 
@@ -392,7 +277,6 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private void ResetData()
         {
-            ClearNtgList();
             ClearTgList();
         }
 
@@ -400,12 +284,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
         {
             SelectedTgItem = null;
             TgItemsSource = new ObservableCollection<SingleMouseViewModel>();
-        }
-
-        private void ClearNtgList()
-        {
-            SelectedNtgItem = null;
-            NtgItemsSource = new ObservableCollection<SingleMouseViewModel>();
+            BatchSettingsCommand.RaiseCanExecuteChangedNotification();
         }
 
         private void AddTgFile()
@@ -417,124 +296,31 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 return;
             }
 
+
             ISingleMouse newFile = ModelResolver.Resolve<ISingleMouse>();
+            newFile.AddFile(GetSingleFile(fileLocation));
+            newFile.Name = Path.GetFileNameWithoutExtension(fileLocation);
+
             SingleMouseViewModel viewModel = new SingleMouseViewModel(newFile);
-            //newFile.VideoFileName = fileLocation;
 
             ObservableCollection<SingleMouseViewModel> currentList = new ObservableCollection<SingleMouseViewModel>(TgItemsSource);
             currentList.Add(viewModel);
             TgItemsSource = currentList;
         }
 
-        private void LoadLabbook()
+        private ISingleFile GetSingleFile(string fileName)
         {
-            LookForLabbook();
-        }
+            ISingleFile singleFile = ModelResolver.Resolve<ISingleFile>();
 
-        private void LookForLabbook()
-        {
-            IRepository repo = RepositoryResolver.Resolve<IRepository>();
-            string initialLocation = repo.GetValue<string>("LabbookLocation");
+            singleFile.VideoFileName = fileName;
+            singleFile.VideoNumber = Path.GetFileNameWithoutExtension(fileName);
 
-            string fileLocation = FileBrowser.BrowseForFile("Mouse Collection|*.mcd", initialLocation);
-
-            if (string.IsNullOrWhiteSpace(fileLocation))
-            {
-                return;
-            }
-
-            repo.SetValue("LabbookLocation", Path.GetDirectoryName(fileLocation));
-            repo.Save();
-
-            XmlSerializer serializer = new XmlSerializer(typeof(MouseCollectionXml));
-            MouseCollectionXml mc;
-
-            try
-            {
-                using (StreamReader reader = new StreamReader(fileLocation))
-                {
-                    mc = (MouseCollectionXml)serializer.Deserialize(reader);
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("There was an error opening the file", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            ObservableCollection<SingleMouseViewModel> tgList = new ObservableCollection<SingleMouseViewModel>(TgItemsSource);
-            ObservableCollection<SingleMouseViewModel> ntgList = new ObservableCollection<SingleMouseViewModel>(NtgItemsSource);
-
-            foreach (SingleMouseXml mouse in mc.Mice)
-            {
-                ISingleMouse modelMouse = mouse.GetMouse();
-
-                if (modelMouse == null)
-                {
-                    continue;
-                }
-
-                ITypeBase type = modelMouse.Type;
-
-                if (type is INonTransgenic)
-                {
-                    ntgList.Add(new SingleMouseViewModel(modelMouse));
-                }
-                else if (type is ITransgenic)
-                {
-                    tgList.Add(new SingleMouseViewModel(modelMouse));
-                }
-                else if (type is IUndefined)
-                {
-                    
-                }
-            }
-
-            TgItemsSource = tgList;
-            NtgItemsSource = ntgList;
-
-            //ObservableCollection<SingleMouseViewModel> mice2 = new ObservableCollection<SingleMouseViewModel>();
-            //string fileLocation2 = Path.GetDirectoryName(test);
-            //foreach (var mouse in mc.Mice)
-            //{
-            //    mice2.Add(new SingleMouseViewModel(mouse.GetMouse()));
-            //}
-
-            //var result = MessageBox.Show("Is there a lab book associated with this set?", "Browse for lab book?", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            //if (result != MessageBoxResult.Yes)
-            //{
-            //    return;
-            //}
-
-            //AgeSingleInputViewModel viewModel = new AgeSingleInputViewModel();
-            //SingleInput view = new SingleInput();
-            //view.DataContext = viewModel;
-            //view.ShowDialog();
-
-            //if (viewModel.ExitResult != WindowExitResult.Ok)
-            //{
-            //    return;
-            //}
-
-            //int age = viewModel.Age;
-
-            //var fileLocation = FileBrowser.BrowseForFile("Labbook|*.labbook");
-
-            //if (string.IsNullOrWhiteSpace(fileLocation))
-            //{
-            //    return;
-            //}
-
-            //string[] lines = File.ReadAllLines(fileLocation);
-
-            //ILabbookConverter converter = ModelResolver.Resolve<ILabbookConverter>();
-            //List<ILabbookData> data = converter.GenerateLabbookData(lines, age);
+            return singleFile;
         }
 
         private void AddTgFolder()
         {
-            string folderLocation = FileBrowser.BrowseForFolder();
+            string folderLocation = FileBrowser.BrowseForFolder(@"F:\New folder\TestVids");
 
             if (string.IsNullOrWhiteSpace(folderLocation))
             {
@@ -552,7 +338,8 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 if (CheckIfExtensionIsVideo(extension))
                 {
                     ISingleMouse newFile = ModelResolver.Resolve<ISingleMouse>();
-                    //newFile.VideoFileName = file;
+                    newFile.AddFile(GetSingleFile(file));
+                    newFile.Name = Path.GetFileNameWithoutExtension(file);
                     currentList.Add(new SingleMouseViewModel(newFile));
                 }
             }
@@ -569,79 +356,19 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
         {
             TgItemsSource.Remove(SelectedTgItem);
             NotifyPropertyChanged("TgItemsSource");
+            BatchSettingsCommand.RaiseCanExecuteChangedNotification();
         }
 
         private bool CanRemoveTgFile()
         {
-            if (SelectedTgItem == null)
+            if (SelectedTgItem == null || Running)
             {
                 return false;
             }
 
             return true;
         }
-
-        private void AddNtgFile()
-        {
-            string fileLocation = FileBrowser.BroseForVideoFiles();
-
-            if (string.IsNullOrWhiteSpace(fileLocation))
-            {
-                return;
-            }
-
-            ISingleMouse newFile = ModelResolver.Resolve<ISingleMouse>();
-           // newFile.VideoFileName = fileLocation;
-
-            ObservableCollection<SingleMouseViewModel> currentList = new ObservableCollection<SingleMouseViewModel>(NtgItemsSource);
-            currentList.Add(new SingleMouseViewModel(newFile));
-            NtgItemsSource = currentList;
-        }
-
-        private void AddNtgFolder()
-        {
-            string folderLocation = FileBrowser.BrowseForFolder();
-
-            if (string.IsNullOrWhiteSpace(folderLocation))
-            {
-                return;
-            }
-
-            ObservableCollection<SingleMouseViewModel> currentList = new ObservableCollection<SingleMouseViewModel>(NtgItemsSource);
-
-            string[] files = Directory.GetFiles(folderLocation);
-
-            foreach (string file in files)
-            {
-                string extension = Path.GetExtension(file);
-
-                if (CheckIfExtensionIsVideo(extension))
-                {
-                    ISingleMouse newFile = ModelResolver.Resolve<ISingleMouse>();
-                    //newFile.VideoFileName = file;
-                    currentList.Add(new SingleMouseViewModel(newFile));
-                }
-            }
-
-            NtgItemsSource = currentList;
-        }
-
-        private void RemoveNtgFile()
-        {
-            NtgItemsSource.Remove(SelectedNtgItem);
-            NotifyPropertyChanged("NtgItemsSource");
-        }
-
-        private bool CanRemoveNtgFile()
-        {
-            if (SelectedNtgItem == null)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
+        
         private static object lockObject = new object();
         private bool m_Continue = true;
 
@@ -665,9 +392,9 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private void RunVideo()
         {
-            IEnumerable<SingleMouseViewModel> allMice = TgItemsSource.Concat(NtgItemsSource);
+            IEnumerable<SingleMouseViewModel> allMice = TgItemsSource;
 
-            Parallel.ForEach(allMice, new ParallelOptions() {MaxDegreeOfParallelism = 3}, (mouse, state) =>
+            Parallel.ForEach(allMice, new ParallelOptions() {MaxDegreeOfParallelism = 6}, (mouse, state) =>
             //foreach (SingleMouseViewModel mouse in allMice)
             {
                 if (!Running)
@@ -682,101 +409,78 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
             {
                 Running = false;
                 ExportAll();
-                ExportBatchCommand.RaiseCanExecuteChangedNotification();
             });
         }
 
         private void GenerateAllResults()
         {
+            string saveLocation = FileBrowser.SaveFile("Excel|*.xlsx");
+
+            if (string.IsNullOrWhiteSpace(saveLocation))
+            {
+                return;
+            }
+
             List<IMouseDataResult> tgResultsList = new List<IMouseDataResult>();
             foreach (SingleMouseViewModel mouse in TgItemsSource)
             {
                 tgResultsList.AddRange(mouse.VideoFiles.Select(singleFile => mouse.Results[singleFile]));
             }
 
-            List<IMouseDataResult> ntgResultsList = new List<IMouseDataResult>();
-            foreach (SingleMouseViewModel mouse in NtgItemsSource)
-            {
-                ntgResultsList.AddRange(mouse.VideoFiles.Select(singleFile => mouse.Results[singleFile]));
-            }
+            IMouseDataResult[] tgResults = tgResultsList.ToArray();
 
-            IMouseDataResult[] tgResults = tgResultsList.OrderBy(x => x.Age).ToArray();
-            IMouseDataResult[] ntgResults = ntgResultsList.OrderBy(x => x.Age).ToArray();
-
-            int rows = tgResults.Length + ntgResults.Length + 10;
+            int rows = tgResults.Length + 10;
             const int columns = 14;
 
             object[,] finalResults = new object[rows, columns];
 
             finalResults[0, 0] = "Name";
-            finalResults[0, 1] = "Type";
-            finalResults[0, 2] = "Age";
-            finalResults[0, 3] = "Waist";
-            finalResults[0, 4] = "Duration";
-            finalResults[0, 5] = "Distance";
+            finalResults[0, 1] = "Start Frame";
+            finalResults[0, 2] = "End Frame";
+            finalResults[0, 3] = "Duration";
+            finalResults[0, 4] = "Distance";
+            finalResults[0, 5] = "Centroid Distance";
             finalResults[0, 6] = "Max Velocity";
-            finalResults[0, 7] = "Max Ang Velocity";
-            finalResults[0, 8] = "Average Velocity";
-            finalResults[0, 9] = "Average Ang Velocity";
-            finalResults[0, 10] = "Average Pelvic area";
-            finalResults[0, 11] = "Average Pelvic area2";
-            finalResults[0, 12] = "Average Pelvic area3";
-            finalResults[0, 13] = "Average Pelvic area4";
-
+            finalResults[0, 7] = "Max Centroid Velocity";
+            finalResults[0, 8] = "Max Ang Velocity";
+            finalResults[0, 9] = "Average Velocity";
+            finalResults[0, 10] = "Average Centroid Velocity";
+            finalResults[0, 11] = "Average Angular Velocity";
+            
             try
             {
                 int tgLength = tgResults.Length;
                 for (int i = 1; i <= tgLength; i++)
                 {
                     finalResults[i, 0] = tgResults[i - 1].Name;
-                    finalResults[i, 1] = "Transgenic";
-                    finalResults[i, 2] = tgResults[i - 1].Age;
-                    finalResults[i, 3] = tgResults[i - 1].CentroidSize;
-                    finalResults[i, 4] = tgResults[i - 1].Duration;
-                    finalResults[i, 5] = tgResults[i - 1].DistanceTravelled;
+                    finalResults[i, 1] = tgResults[i - 1].StartFrame;
+                    finalResults[i, 2] = tgResults[i - 1].EndFrame;
+                    finalResults[i, 3] = tgResults[i - 1].Duration;
+                    finalResults[i, 4] = tgResults[i - 1].DistanceTravelled;
+                    finalResults[i, 5] = tgResults[i - 1].CentroidDistanceTravelled;
                     finalResults[i, 6] = tgResults[i - 1].MaxSpeed;
-                    finalResults[i, 7] = tgResults[i - 1].MaxAngularVelocty;
-                    finalResults[i, 8] = tgResults[i - 1].AverageVelocity;
-                    finalResults[i, 9] = tgResults[i - 1].AverageAngularVelocity;
-                    finalResults[i, 10] = tgResults[i - 1].PelvicArea;
-                    finalResults[i, 11] = tgResults[i - 1].PelvicArea2;
-                    finalResults[i, 12] = tgResults[i - 1].PelvicArea3;
-                    finalResults[i, 13] = tgResults[i - 1].PelvicArea4;
+                    finalResults[i, 7] = tgResults[i - 1].MaxCentroidSpeed;
+                    finalResults[i, 8] = tgResults[i - 1].MaxAngularVelocty;
+                    finalResults[i, 9] = tgResults[i - 1].AverageVelocity;
+                    finalResults[i, 10] = tgResults[i - 1].AverageCentroidVelocity;
+                    finalResults[i, 11] = tgResults[i - 1].AverageAngularVelocity;
                 }
 
-                for (int i = 1; i <= ntgResults.Length; i++)
-                {
-                    finalResults[i + tgLength, 0] = ntgResults[i - 1].Name;
-                    finalResults[i + tgLength, 1] = "Non Transgenic";
-                    finalResults[i + tgLength, 2] = ntgResults[i - 1].Age;
-                    finalResults[i + tgLength, 3] = ntgResults[i - 1].CentroidSize;
-                    finalResults[i + tgLength, 4] = ntgResults[i - 1].Duration;
-                    finalResults[i + tgLength, 5] = ntgResults[i - 1].DistanceTravelled;
-                    finalResults[i + tgLength, 6] = ntgResults[i - 1].MaxSpeed;
-                    finalResults[i + tgLength, 7] = ntgResults[i - 1].MaxAngularVelocty;
-                    finalResults[i + tgLength, 8] = ntgResults[i - 1].AverageVelocity;
-                    finalResults[i + tgLength, 9] = ntgResults[i - 1].AverageAngularVelocity;
-                    finalResults[i + tgLength, 10] = ntgResults[i - 1].PelvicArea;
-                    finalResults[i + tgLength, 11] = ntgResults[i - 1].PelvicArea2;
-                    finalResults[i + tgLength, 12] = ntgResults[i - 1].PelvicArea3;
-                    finalResults[i + tgLength, 13] = ntgResults[i - 1].PelvicArea4;
-                }
-
-                ExcelService.WriteData(finalResults, @"D:\FirstTestResults9.xlsx");
+                ExcelService.WriteData(finalResults, saveLocation);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
 
-            try
-            {
-                GenerateBatchResults();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            //try
+            //{
+            //    GenerateBatchResults();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.Message);
+            //}
         }
 
         public struct BrettTuple<T1, T2>
@@ -791,230 +495,6 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
             }
         }
 
-        private void GenerateBatchResults()
-        {
-            Dictionary<BrettTuple<Type, int>, IMouseDataResult> sortedResults = new Dictionary<BrettTuple<Type, int>, IMouseDataResult>(); 
-
-            List<IMouseDataResult> tgResultsList = new List<IMouseDataResult>();
-            foreach (SingleMouseViewModel mouse in TgItemsSource)
-            {
-                tgResultsList.AddRange(mouse.VideoFiles.Select(singleFile => mouse.Results[singleFile]));
-            }
-
-            List<IMouseDataResult> ntgResultsList = new List<IMouseDataResult>();
-            foreach (SingleMouseViewModel mouse in NtgItemsSource)
-            {
-                ntgResultsList.AddRange(mouse.VideoFiles.Select(singleFile => mouse.Results[singleFile]));
-            }
-
-            //IMouseDataResult[] tgResults = tgResultsList.OrderBy(x => x.Age).ToArray();
-            //IMouseDataResult[] ntgResults = ntgResultsList.OrderBy(x => x.Age).ToArray();
-
-            try
-            {
-                int tgLength = tgResultsList.Count;
-                
-                for (int i = 1; i <= tgLength; i++)
-                {
-                    BrettTuple<Type, int> currentResult = new BrettTuple<Type, int>(typeof(ITransgenic), tgResultsList[i - 1].Age);
-                    IMouseDataResult cumulativeResult;
-                    
-                    if (sortedResults.ContainsKey(currentResult))
-                    {
-                        cumulativeResult = sortedResults[currentResult];
-
-                        double centroid = tgResultsList[i - 1].GetCentroidWidthForRunning();
-                        if (centroid > 0)
-                        {
-                            if (cumulativeResult.CentroidsTest == null)
-                            {
-                                cumulativeResult.CentroidsTest = new List<double>();
-                            }
-                            cumulativeResult.CentroidsTest.Add(centroid);
-                        }
-
-                        cumulativeResult.Duration += tgResultsList[i - 1].Duration;
-                        cumulativeResult.DistanceTravelled += tgResultsList[i - 1].DistanceTravelled;
-
-                        double maxSpeed = tgResultsList[i - 1].MaxSpeed;
-                        if (maxSpeed > cumulativeResult.MaxSpeed)
-                        {
-                            cumulativeResult.MaxSpeed = maxSpeed;
-                        }
-
-                        double maxAngSpeed = tgResultsList[i - 1].MaxAngularVelocty;
-                        if (maxAngSpeed > cumulativeResult.MaxAngularVelocty)
-                        {
-                            cumulativeResult.MaxAngularVelocty = maxAngSpeed;
-                        }
-                        
-                        cumulativeResult.AverageVelocity += tgResultsList[i - 1].GetAverageSpeedForMoving();
-                        cumulativeResult.AverageAngularVelocity += tgResultsList[i - 1].GetAverageAngularSpeedForTurning();
-                        cumulativeResult.PelvicArea += tgResultsList[i - 1].GetCentroidWidthForPelvic1();
-                        cumulativeResult.PelvicArea2 += tgResultsList[i - 1].GetCentroidWidthForPelvic2();
-                        cumulativeResult.PelvicArea3 += tgResultsList[i - 1].GetCentroidWidthForPelvic3();
-                        cumulativeResult.PelvicArea4 += tgResultsList[i - 1].GetCentroidWidthForPelvic4();
-                        cumulativeResult.Dummy++;
-                    }
-                    else
-                    {
-                        cumulativeResult = ModelResolver.Resolve<IMouseDataResult>();
-                        double centroid = tgResultsList[i - 1].GetCentroidWidthForRunning();
-                        if (centroid > 0)
-                        {
-                            if (cumulativeResult.CentroidsTest == null)
-                            {
-                                cumulativeResult.CentroidsTest = new List<double>();
-                            }
-                            cumulativeResult.CentroidsTest.Add(centroid);
-                        }
-                        
-                        cumulativeResult.CentroidSize = tgResultsList[i - 1].GetCentroidWidthForRunning();
-                        cumulativeResult.Duration = tgResultsList[i - 1].Duration;
-                        cumulativeResult.DistanceTravelled = tgResultsList[i - 1].DistanceTravelled;
-                        cumulativeResult.MaxSpeed = tgResultsList[i - 1].MaxSpeed;
-                        cumulativeResult.MaxAngularVelocty = tgResultsList[i - 1].MaxAngularVelocty;
-                        cumulativeResult.AverageVelocity = tgResultsList[i - 1].GetAverageSpeedForMoving();
-                        cumulativeResult.AverageAngularVelocity = tgResultsList[i - 1].GetAverageAngularSpeedForTurning();
-                        cumulativeResult.PelvicArea = tgResultsList[i - 1].GetCentroidWidthForPelvic1();
-                        cumulativeResult.PelvicArea2 += tgResultsList[i - 1].GetCentroidWidthForPelvic2();
-                        cumulativeResult.PelvicArea3 += tgResultsList[i - 1].GetCentroidWidthForPelvic3();
-                        cumulativeResult.PelvicArea4 += tgResultsList[i - 1].GetCentroidWidthForPelvic4();
-                        cumulativeResult.Dummy = 1;
-
-                        sortedResults.Add(currentResult, cumulativeResult);
-                    }
-                }
-
-                int ntgLength = ntgResultsList.Count;
-                for (int i = 1; i <= ntgLength; i++)
-                {
-                    BrettTuple<Type, int> currentResult = new BrettTuple<Type, int>(typeof(INonTransgenic), ntgResultsList[i - 1].Age);
-                    IMouseDataResult cumulativeResult;
-                    if (sortedResults.ContainsKey(currentResult))
-                    {
-                        cumulativeResult = sortedResults[currentResult];
-                        
-                        double centroid = ntgResultsList[i - 1].GetCentroidWidthForRunning();
-                        if (centroid > 0)
-                        {
-                            if (cumulativeResult.CentroidsTest == null)
-                            {
-                                cumulativeResult.CentroidsTest = new List<double>();
-                            }
-                            cumulativeResult.CentroidsTest.Add(centroid);
-                        }
-
-                        cumulativeResult.Duration += ntgResultsList[i - 1].Duration;
-                        cumulativeResult.DistanceTravelled += ntgResultsList[i - 1].DistanceTravelled;
-
-                        double maxSpeed = ntgResultsList[i - 1].MaxSpeed;
-                        if (maxSpeed > cumulativeResult.MaxSpeed)
-                        {
-                            cumulativeResult.MaxSpeed = maxSpeed;
-                        }
-
-                        double maxAngSpeed = ntgResultsList[i - 1].MaxAngularVelocty;
-                        if (maxAngSpeed > cumulativeResult.MaxAngularVelocty)
-                        {
-                            cumulativeResult.MaxAngularVelocty = maxAngSpeed;
-                        }
-
-                        cumulativeResult.AverageVelocity += ntgResultsList[i - 1].GetAverageSpeedForMoving();
-                        cumulativeResult.AverageAngularVelocity += ntgResultsList[i - 1].GetAverageAngularSpeedForTurning();
-                        cumulativeResult.PelvicArea += ntgResultsList[i - 1].GetCentroidWidthForPelvic1();
-                        cumulativeResult.PelvicArea2 += ntgResultsList[i - 1].GetCentroidWidthForPelvic2();
-                        cumulativeResult.PelvicArea3 += ntgResultsList[i - 1].GetCentroidWidthForPelvic3();
-                        cumulativeResult.PelvicArea4 += ntgResultsList[i - 1].GetCentroidWidthForPelvic4();
-                        cumulativeResult.Dummy++;
-                    }
-                    else
-                    {
-                        cumulativeResult = ModelResolver.Resolve<IMouseDataResult>();
-
-                        double centroid = ntgResultsList[i - 1].GetCentroidWidthForRunning();
-                        if (centroid > 0)
-                        {
-                            if (cumulativeResult.CentroidsTest == null)
-                            {
-                                cumulativeResult.CentroidsTest = new List<double>();
-                            }
-                            cumulativeResult.CentroidsTest.Add(centroid);
-                        }
-
-                        cumulativeResult.Duration = ntgResultsList[i - 1].Duration;
-                        cumulativeResult.DistanceTravelled = ntgResultsList[i - 1].DistanceTravelled;
-                        cumulativeResult.MaxSpeed = ntgResultsList[i - 1].MaxSpeed;
-                        cumulativeResult.MaxAngularVelocty = ntgResultsList[i - 1].MaxAngularVelocty;
-                        cumulativeResult.AverageVelocity = ntgResultsList[i - 1].GetAverageSpeedForMoving();
-                        cumulativeResult.AverageAngularVelocity = ntgResultsList[i - 1].GetAverageAngularSpeedForTurning();
-                        cumulativeResult.PelvicArea = ntgResultsList[i - 1].GetCentroidWidthForPelvic1();
-                        cumulativeResult.PelvicArea2 += ntgResultsList[i - 1].GetCentroidWidthForPelvic2();
-                        cumulativeResult.PelvicArea3 += ntgResultsList[i - 1].GetCentroidWidthForPelvic3();
-                        cumulativeResult.PelvicArea4 += ntgResultsList[i - 1].GetCentroidWidthForPelvic4();
-                        cumulativeResult.Dummy = 1;
-
-                        sortedResults.Add(currentResult, cumulativeResult);
-                    }
-                }
-
-                int rows = tgResultsList.Count + ntgResultsList.Count + 10;
-                const int columns = 13;
-                object[,] finalResults = new object[rows, columns];
-
-                finalResults[0, 0] = "Type";
-                finalResults[0, 1] = "Age";
-                finalResults[0, 2] = "Waist";
-                finalResults[0, 3] = "Duration";
-                finalResults[0, 4] = "Distance";
-                finalResults[0, 5] = "Max Velocity";
-                finalResults[0, 6] = "Max Ang Velocity";
-                finalResults[0, 7] = "Average Velocity";
-                finalResults[0, 8] = "Average Ang Velocity";
-                finalResults[0, 9] = "Average Pelvic area";
-                finalResults[0, 10] = "Average Pelvic area2";
-                finalResults[0, 11] = "Average Pelvic area3";
-                finalResults[0, 12] = "Average Pelvic area4";
-
-                int counter = 1;
-                foreach (var kvp in sortedResults)
-                {
-                    IMouseDataResult currentResult = kvp.Value;
-                    double totalCount = currentResult.Dummy;
-                    finalResults[counter, 0] = kvp.Key.Item1.Name;
-                    finalResults[counter, 1] = kvp.Key.Item2;
-
-                    if (currentResult.CentroidsTest == null || !currentResult.CentroidsTest.Any())
-                    {
-                        finalResults[counter, 2] = 0;
-                    }
-                    else
-                    {
-                        finalResults[counter, 2] = currentResult.CentroidsTest.Average();
-                    }
-                    
-                    finalResults[counter, 3] = currentResult.Duration;
-                    finalResults[counter, 4] = currentResult.DistanceTravelled;
-                    finalResults[counter, 5] = currentResult.MaxSpeed;
-                    finalResults[counter, 6] = currentResult.MaxAngularVelocty;
-                    finalResults[counter, 7] = currentResult.AverageVelocity / totalCount;
-                    finalResults[counter, 8] = currentResult.AverageAngularVelocity / totalCount;
-                    finalResults[counter, 9] = currentResult.PelvicArea / totalCount;
-                    finalResults[counter, 10] = currentResult.PelvicArea2 / totalCount;
-                    finalResults[counter, 11] = currentResult.PelvicArea3 / totalCount;
-                    finalResults[counter, 12] = currentResult.PelvicArea4 / totalCount;
-
-                    counter++;
-                }
-
-                ExcelService.WriteData(finalResults, @"D:\BatchTestResults6.xlsx");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
         private bool CanProcessVideos()
         {
             return !Running;
@@ -1024,6 +504,8 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
         {
             if (!Running)
             {
+                ResetProgress();
+
                 Running = true;
                 Task.Factory.StartNew(RunVideo);
                 //RunVideo();
@@ -1035,9 +517,17 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
             }
         }
 
+        private void ResetProgress()
+        {
+            foreach (var mouse in TgItemsSource)
+            {
+                mouse.ResetProgress();
+            }
+        }
+
         private void SetOutputFolder()
         {
-            string folderLocation = FileBrowser.BrowseForFolder();
+            string folderLocation = FileBrowser.BrowseForFolder(@"F:\New folder\");
 
             if (string.IsNullOrWhiteSpace(folderLocation))
             {
@@ -1063,7 +553,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
             if (result == MessageBoxResult.Yes)
             {
-                IEnumerable<SingleMouseViewModel> allMice = TgItemsSource.Concat(NtgItemsSource);
+                IEnumerable<SingleMouseViewModel> allMice = TgItemsSource;
                 foreach (SingleMouseViewModel mouse in allMice)
                 {
                     mouse.Stop = true;
@@ -1165,12 +655,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 //}
 
                 SingleMouseViewModel mouse = TgItemsSource.FirstOrDefault(x => x.VideoFiles.FirstOrDefault(y => y.VideoFileName.Contains(videoFileName)) != null);
-
-                if (mouse == null)
-                {
-                    mouse = NtgItemsSource.FirstOrDefault(x => x.VideoFiles.FirstOrDefault(y => y.VideoFileName.Contains(videoFileName)) != null);
-                }
-
+                
                 if (mouse == null)
                 {
                     //Can't find mouse
@@ -1203,7 +688,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                     mouse.Results.Add(singleFile, mouseDataResult);
                     mouse.ReviewCommand.RaiseCanExecuteChangedNotification();
                     mouse.UpdateProgress(singleFile, 1);
-                    //return;
+                    
                     continue;
                 }
 
@@ -1222,27 +707,15 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                         singleFrame.PelvicArea2 = tempResult.PelvicArea2;
                         singleFrame.PelvicArea3 = tempResult.PelvicArea3;
                         singleFrame.PelvicArea4 = tempResult.PelvicArea4;
-                        //singleFrame.Distance = tempResult.Distance;
                         singleFrame.SmoothedHeadPoint = tempResult.SmoothedHeadPoint;
                         singleFrame.Centroid = tempResult.Centroid;
                     }
 
                     results.Add(kvp.Key, singleFrame);
                 }
+                
 
-                //double frameRate = -1;
-                //using (IVideo video = ModelResolver.Resolve<IVideo>())
-                //{
-                //    video.SetVideo(trackedVideo.FileName);
-                //    frameRate = video.FrameRate;
-                //}
-
-                //if (frameRate == -1)
-                //{
-                //    return;
-                //}
-
-                mouseDataResult.Name = mouse.Id;//string.Format("{0}", file);
+                mouseDataResult.Name = mouse.Id;
                 mouseDataResult.Results = results;
                 mouseDataResult.Age = mouse.Age;
                 mouseDataResult.Boundaries = trackedVideo.Boundries;
@@ -1255,9 +728,6 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 mouseDataResult.SmoothMotion = trackedVideo.SmoothMotion;
                 mouseDataResult.FrameRate = trackedVideo.FrameRate;
                 mouseDataResult.UnitsToMilimeters = trackedVideo.UnitsToMilimeters;
-                //mouseDataResult.PelvicArea = trackedVideo.PelvicArea1;
-                //mouseDataResult.CentroidSize = trackedVideo.CentroidSize;
-                //mouseDataResult.DistanceTravelled = trackedVideo.Di
                 mouseDataResult.SmoothFactor = 0.68;
                 mouseDataResult.GenerateResults(file);
                 mouseDataResult.PelvicArea = trackedVideo.PelvicArea1;
@@ -1277,7 +747,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
                 mouse.ReviewCommand.RaiseCanExecuteChangedNotification();
             }//);
 
-            ExportBatchCommand.RaiseCanExecuteChangedNotification();
+            ExportAllCommand.RaiseCanExecuteChangedNotification();
         }
 
         private void ExportAll()
@@ -1292,18 +762,23 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
         private bool CanLoadOutputFolder()
         {
             //return !string.IsNullOrWhiteSpace()
-            return TgItemsSource.Count > 0 || NtgItemsSource.Count > 0;
+            if (Running)
+            {
+                return false;
+            }
+
+            return TgItemsSource.Count > 0;
         }
 
         private void ShowBatchSettings()
         {
             SingleMouseViewModel[] selectedModels = GetSelectedViewModels();
 
-            if (selectedModels.Length == 0)
+            if (!selectedModels.Any())
             {
-                selectedModels = NtgItemsSource.Concat(TgItemsSource).ToArray();
+                selectedModels = TgItemsSource.ToArray();
             }
-
+            
             SettingsView view = new SettingsView();
             SettingsViewModel viewModel = new SettingsViewModel(selectedModels);
             view.DataContext = viewModel;
@@ -1326,30 +801,44 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private SingleMouseViewModel[] GetSelectedViewModels()
         {
-            return NtgItemsSource.Where(x => x.IsSelected).Concat(TgItemsSource.Where(x => x.IsSelected)).ToArray();
+            return TgItemsSource.Where(x => x.IsSelected).ToArray();
         }
 
         private void ExportBatch()
         {
-            BatchExportViewModel viewModel = new BatchExportViewModel(NtgItemsSource.Concat(TgItemsSource));
+            BatchExportViewModel viewModel = new BatchExportViewModel(TgItemsSource);
             BatchExportView view = new BatchExportView();
             view.DataContext = viewModel;
             view.ShowDialog();
         }
+        
 
-        private bool CanExportBatch()
+        private bool CanShowBatchSettings()
         {
-            if (!TgItemsSource.Any() && !NtgItemsSource.Any())
+            if (Running)
             {
                 return false;
             }
 
-            if (TgItemsSource.Any(mouse => mouse.Progress < 1))
-            {
-                return false;
-            }
+            return TgItemsSource.Any();
+        }
 
-            return NtgItemsSource.All(mouse => !(mouse.Progress < 1));
+        private void RaiseButtonNotifications()
+        {
+            AddTgFileCommand.RaiseCanExecuteChangedNotification();
+            AddTgFolderCommand.RaiseCanExecuteChangedNotification();
+            RemoveTgFileCommand.RaiseCanExecuteChangedNotification();
+            ClearTgFilesCommand.RaiseCanExecuteChangedNotification();
+            ProcessCommand.RaiseCanExecuteChangedNotification();
+            SetOutputFolderCommand.RaiseCanExecuteChangedNotification();
+            LoadOutputFolderCommand.RaiseCanExecuteChangedNotification();
+            ExportAllCommand.RaiseCanExecuteChangedNotification();
+            BatchSettingsCommand.RaiseCanExecuteChangedNotification();
+        }
+
+        private bool CanButtonExecute()
+        {
+            return !Running;
         }
     }
 }

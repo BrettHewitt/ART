@@ -325,6 +325,27 @@ namespace AutomatedRodentTracker.Model.Results
             }
         }
 
+        private double m_CentroidDistanceTravelled;
+        public double CentroidDistanceTravelled
+        {
+            get
+            {
+                return m_CentroidDistanceTravelled;
+            }
+            set
+            {
+                if (Equals(m_CentroidDistanceTravelled, value))
+                {
+                    return;
+                }
+
+                m_CentroidDistanceTravelled = value;
+
+                MarkAsDirty();
+            }
+        }
+
+
         private double m_Duration;
         public double Duration
         {
@@ -344,6 +365,47 @@ namespace AutomatedRodentTracker.Model.Results
                 MarkAsDirty();
             }
         }
+
+        private double m_HeadPointDuration;
+        public double HeadPointDuration
+        {
+            get
+            {
+                return m_HeadPointDuration;
+            }
+            set
+            {
+                if (Equals(m_HeadPointDuration, value))
+                {
+                    return;
+                }
+
+                m_HeadPointDuration = value;
+
+                MarkAsDirty();
+            }
+        }
+
+        private double m_CentroidDuration;
+        public double CentroidDuration
+        {
+            get
+            {
+                return m_CentroidDuration;
+            }
+            set
+            {
+                if (Equals(m_CentroidDuration, value))
+                {
+                    return;
+                }
+
+                m_CentroidDuration = value;
+
+                MarkAsDirty();
+            }
+        }
+
 
         private double m_MaxSpeed;
         public double MaxSpeed
@@ -605,6 +667,27 @@ namespace AutomatedRodentTracker.Model.Results
                 MarkAsDirty();
             }
         }
+
+        private PointF[] m_CentroidMotionTrack;
+        public PointF[] CentroidMotionTrack
+        {
+            get
+            {
+                return m_CentroidMotionTrack;
+            }
+            set
+            {
+                if (Equals(m_CentroidMotionTrack, value))
+                {
+                    return;
+                }
+
+                m_CentroidMotionTrack = value;
+
+                MarkAsDirty();
+            }
+        }
+
 
         private Vector[] m_OrientationTrack;
         public Vector[] OrientationTrack
@@ -937,7 +1020,7 @@ namespace AutomatedRodentTracker.Model.Results
             }
         }
 
-        private double m_UnitsToMilimeters;
+        private double m_UnitsToMilimeters = 1;
         public double UnitsToMilimeters
         {
             get
@@ -996,16 +1079,39 @@ namespace AutomatedRodentTracker.Model.Results
             GenerateResults();
         }
 
+        private bool m_ResultsGenerated = false;
+        public bool ResultsGenerated
+        {
+            get
+            {
+                return m_ResultsGenerated;
+            }
+            set
+            {
+                if (Equals(m_ResultsGenerated, value))
+                {
+                    return;
+                }
+
+                m_ResultsGenerated = value;
+
+                MarkAsDirty();
+            }
+        }
+
+
         public void GenerateResults()
         {
             if (Results == null || Results.Count == 0)
             {
                 return;
             }
+
+            ResultsGenerated = true;
             SmoothMotion = true;
             GenerateMotionTrack();
 
-            int frameCount = Results.Count;
+            //int frameCount = Results.Count;
             int startCount = Results.Where(x => x.Value.HeadPoints != null).Select(x => x.Key).Min();
 
             int targetStart = startCount > StartFrame ? startCount : StartFrame;
@@ -1020,302 +1126,90 @@ namespace AutomatedRodentTracker.Model.Results
             AverageVelocity = 0;
             AverageCentroidVelocity = 0;
             DistanceTravelled = 0;
+            CentroidDistanceTravelled = 0;
             CentroidSize = 0;
             PelvicArea = 0;
             PelvicArea2 = 0;
             PelvicArea3 = 0;
             PelvicArea4 = 0;
 
-            List<double> centroidWidths = new List<double>();
-            List<double> pelvicArea1 = new List<double>();
-            List<double> pelvicArea2 = new List<double>();
-            List<double> pelvicArea3 = new List<double>();
-            List<double> pelvicArea4 = new List<double>();
+            //List<double> centroidWidths = new List<double>();
             
             int nextStartCount = targetStart + 1;
             int frameCounter = 0;
             int targetEnd = EndFrame + 1;
 
-            for (int frameNumber = nextStartCount; frameNumber < frameCount; frameNumber++)
+            int headPointCounter = 0;
+            int centroidCounter = 0;
+
+            double dist = 0;
+            double cDist = 0;
+
+            Duration = EndFrame - StartFrame + 1;
+
+            for (int frameNumber = targetStart; frameNumber <= EndFrame; frameNumber++)
             {
                 ISingleFrameResult frameResult = Results[frameNumber];
 
-                if (frameResult == null || frameResult.HeadPoints == null || frameNumber == targetEnd)
+                if (frameResult == null || frameResult.HeadPoints == null)
                 {
                     break;
                 }
 
                 UpdateSingleFrameResult(frameResult, previousFrame, FrameRate);
 
-                if (frameResult.Velocity > MaxSpeed)
+                if (frameResult.HeadPoints != null)
                 {
-                    MaxSpeed = frameResult.Velocity;
-                }
+                    if (frameResult.Velocity > MaxSpeed)
+                    {
+                        MaxSpeed = frameResult.Velocity;
+                    }
 
-                if (frameResult.AngularVelocity > MaxAngularVelocty)
-                {
-                    MaxAngularVelocty = frameResult.AngularVelocity;
+                    if (frameResult.AngularVelocity > MaxAngularVelocty)
+                    {
+                        MaxAngularVelocty = frameResult.AngularVelocity;
+                    }
+
+                    AverageVelocity += frameResult.Velocity;
+                    AverageAngularVelocity += frameResult.AngularVelocity;
+                    dist += frameResult.Distance;
+                    headPointCounter++;
                 }
+                
 
                 if (frameResult.CentroidVelocity > MaxCentroidSpeed)
                 {
                     MaxCentroidSpeed = frameResult.CentroidVelocity;
                 }
-
-                AverageVelocity += frameResult.Velocity;
-                AverageAngularVelocity += frameResult.AngularVelocity;
+                
                 AverageCentroidVelocity += frameResult.CentroidVelocity;
-                //DistanceTravelled += frameResult.Distance;
-
-                //if (frameResult.Distance > 10)
-                //{
-                //    Console.WriteLine("");
-                //}
-
-                if (frameResult.CentroidSize > 0)
-                {
-                    //CentroidSize += frameResult.CentroidSize;
-                    centroidWidths.Add(frameResult.CentroidSize);
-                    //centroidCounter++;
-                }
-
-                if (frameResult.PelvicArea > 0)
-                {
-                    pelvicArea1.Add(frameResult.PelvicArea);
-
-                    //PelvicArea += frameResult.PelvicArea;
-                    //PelvicArea2 += frameResult.PelvicArea2;
-                    //pelvicCounter++;
-                }
-
-                if (frameResult.PelvicArea2 > 0)
-                {
-                    pelvicArea2.Add(frameResult.PelvicArea2);
-                }
-
-                if (frameResult.PelvicArea3 > 0)
-                {
-                    pelvicArea3.Add(frameResult.PelvicArea3);
-                }
-
-                if (frameResult.PelvicArea4 > 0)
-                {
-                    pelvicArea4.Add(frameResult.PelvicArea4);
-                }
-                    
-                    
+                cDist += frameResult.CentroidDistance;
+                centroidCounter++;
                 frameCounter++;
                 previousFrame = frameResult;
             }
 
-            ITrackSmoothing smoothing = ModelResolver.Resolve<ITrackSmoothing>();
-            DistanceTravelled = smoothing.GetTrackLength(SmoothMotion ? SmoothedMotionTrack : MotionTrack);
+            //ITrackSmoothing smoothing = ModelResolver.Resolve<ITrackSmoothing>();
+            //DistanceTravelled = smoothing.GetTrackLength(SmoothMotion ? SmoothedMotionTrack : MotionTrack);
             Duration = frameCounter;
 
-            AverageVelocity /= frameCounter;
-            AverageAngularVelocity /= frameCounter;
-            AverageCentroidVelocity /= frameCounter;
+            AverageVelocity /= headPointCounter;
+            AverageAngularVelocity /= headPointCounter;
+            AverageCentroidVelocity /= centroidCounter;
 
-            int centroidCount = centroidWidths.Count;
+            DistanceTravelled = dist;
+            CentroidDistanceTravelled = cDist;
+
+            CentroidDuration = centroidCounter;
+            HeadPointDuration = headPointCounter;
             
-            if (centroidCount > 10)
-            {
-                List<double> finalWidths = new List<double>();
-                foreach (double width in centroidWidths)
-                {
-                    if (width <= 0)
-                    {
-                        continue;
-                    }
-
-                    if (width > 250)
-                    {
-                        continue;
-                    }
-
-                    finalWidths.Add(width*UnitsToMilimeters);
-                }
-
-                if (finalWidths.Count > 10)
-                {
-                    finalWidths.Sort();
-
-                    int finalCount = finalWidths.Count;
-
-                    //20%
-                    int startRange = (int)(finalCount * 0.2d);
-
-                    finalWidths.RemoveRange(finalWidths.Count - startRange, startRange);
-                    finalWidths.RemoveRange(0, startRange);
-
-                    CentroidSize = finalWidths.Average();
-                }
-                
-                //CentroidSize *= UnitsToMilimeters;
-            }
-            //if (centroidCounter > 0)
-            //{
-            //    CentroidSize /= centroidCounter;
-            //}
-
-            double unitsToMmSquared = Math.Pow(UnitsToMilimeters, 2);
-            int pelvicCount = pelvicArea1.Count;
-            if (pelvicCount > 10)
-            {
-                List<double> finalWidths = new List<double>();
-                foreach (double width in pelvicArea1)
-                {
-                    if (width <= 0)
-                    {
-                        continue;
-                    }
-
-                    finalWidths.Add(width* unitsToMmSquared);
-                }
-
-                finalWidths.Sort();
-
-                int finalCount = finalWidths.Count;
-
-                //20%
-                int startRange = (int)(finalCount * 0.3d);
-
-                finalWidths.RemoveRange(finalWidths.Count - startRange, startRange);
-                finalWidths.RemoveRange(0, startRange);
-
-                PelvicArea = finalWidths.Average();
-            }
-
-            int pelvicCount2 = pelvicArea2.Count;
-            if (pelvicCount2 > 10)
-            {
-                List<double> finalWidths = new List<double>();
-                foreach (double width in pelvicArea2)
-                {
-                    if (width <= 0)
-                    {
-                        continue;
-                    }
-
-                    finalWidths.Add(width* unitsToMmSquared);
-                }
-
-                finalWidths.Sort();
-
-                int finalCount = finalWidths.Count;
-
-                //20%
-                int startRange = (int)(finalCount * 0.3d);
-
-                finalWidths.RemoveRange(finalWidths.Count - startRange, startRange);
-                finalWidths.RemoveRange(0, startRange);
-
-                PelvicArea2 = finalWidths.Average();
-            }
-
-            int pelvicCount3 = pelvicArea3.Count;
-            if (pelvicCount3 > 10)
-            {
-                List<double> finalWidths = new List<double>();
-                foreach (double width in pelvicArea3)
-                {
-                    if (width <= 0)
-                    {
-                        continue;
-                    }
-
-                    finalWidths.Add(width * unitsToMmSquared);
-                }
-
-                finalWidths.Sort();
-
-                int finalCount = finalWidths.Count;
-
-                //20%
-                int startRange = (int)(finalCount * 0.3d);
-
-                finalWidths.RemoveRange(finalWidths.Count - startRange, startRange);
-                finalWidths.RemoveRange(0, startRange);
-
-                PelvicArea3 = finalWidths.Average();
-            }
-
-            int pelvicCount4 = pelvicArea4.Count;
-            if (pelvicCount4 > 10)
-            {
-                List<double> finalWidths = new List<double>();
-                foreach (double width in pelvicArea4)
-                {
-                    if (width <= 0)
-                    {
-                        continue;
-                    }
-
-                    finalWidths.Add(width * unitsToMmSquared);
-                }
-
-                finalWidths.Sort();
-
-                int finalCount = finalWidths.Count;
-
-                //20%
-                int startRange = (int)(finalCount * 0.3d);
-
-                finalWidths.RemoveRange(finalWidths.Count - startRange, startRange);
-                finalWidths.RemoveRange(0, startRange);
-
-                PelvicArea4 = finalWidths.Average();
-            }
-
-            //if (pelvicCounter > 0)
-            //{
-            //    PelvicArea /= pelvicCounter;
-            //    PelvicArea2 /= pelvicCounter;
-            //}
-
             IBehaviourSpeedDefinitions speedDef = ModelResolver.Resolve<IBehaviourSpeedDefinitions>();
 
             List<IMovementBehaviour> movements = new List<IMovementBehaviour>();
             List<IRotationBehaviour> rotations = new List<IRotationBehaviour>();
             IMovementBehaviour previousMovement = null;
             IRotationBehaviour previousRotation = null;
-
-            //for (int frameNumber = nextStartCount; frameNumber < frameCount; frameNumber++)
-            //{
-            //    double currentVelocity = Results[frameNumber].Velocity;
-            //    double currentAngularVelocity = Results[frameNumber].AngularVelocity;
-
-            //    //Console.WriteLine("Frame Number: {0} - Velocity: {1} - Ang Velocity: {2}", frameNumber, currentVelocity, currentAngularVelocity);
-
-            //    IMovementBehaviour currentMovement = speedDef.GetMovementBehaviour(currentVelocity);
-            //    IRotationBehaviour currentRotation = speedDef.GetRotationBehaviour(currentAngularVelocity);
-
-            //    if (!currentMovement.Equals(previousMovement))
-            //    {
-            //        if (movements.Any())
-            //        {
-            //            movements.Last().EndFrame = frameNumber - 1;
-            //        }
-
-            //        currentMovement.StartFrame = frameNumber;
-            //        movements.Add(currentMovement);
-            //    }
-
-            //    if (!currentRotation.Equals(previousRotation))
-            //    {
-            //        if (rotations.Any())
-            //        {
-            //            rotations.Last().EndFrame = frameNumber - 1;
-            //        }
-
-            //        currentRotation.StartFrame = frameNumber;
-            //        rotations.Add(currentRotation);
-            //    }
-
-            //    previousMovement = currentMovement;
-            //    previousRotation = currentRotation;
-            //}
-
+            
             //Generate behaviours
 
             //List<double> v5 = new List<double>();
@@ -1334,25 +1228,7 @@ namespace AutomatedRodentTracker.Model.Results
                 //Test1(i, o5, v5, c5, 5, false);
                 Test1(i, o, v, c, frameDelta, true);
             }
-
-            //if (!string.IsNullOrWhiteSpace(File))
-            //{
-            //    if (File.Contains("091119-0002"))
-            //    {
-            //        StringBuilder sb = new StringBuilder();
-            //        foreach (var speed in o)
-            //        {
-            //            sb.Append(speed);
-            //            sb.Append(",");
-            //        }
-            //        sb.Remove(sb.Length - 1, 1);
-            //        using (StreamWriter sw = new StreamWriter(@"F:\Datasets\AngularVelocity.csv"))
-            //        {
-            //            sw.WriteLine(sb.ToString());
-            //        }
-            //    }
-            //}
-
+            
             int counter = 0;
             double maxSpeed = -1;
             bool counterHit = false;
@@ -1396,7 +1272,7 @@ namespace AutomatedRodentTracker.Model.Results
                 counter++;
             }
 
-            MaxSpeed = maxSpeed;
+            //MaxSpeed = maxSpeed;
 
             if (!counterHit)
             {
@@ -1449,7 +1325,7 @@ namespace AutomatedRodentTracker.Model.Results
                 counter++;
             }
 
-            MaxAngularVelocty = maxAngSpeed;
+            //MaxAngularVelocty = maxAngSpeed;
 
             if (!counterHit)
             {
@@ -1581,10 +1457,18 @@ namespace AutomatedRodentTracker.Model.Results
 
         private void UpdateSingleFrameResult(ISingleFrameResult singleFrameResult)
         {
-            PointF midPoint = singleFrameResult.HeadPoints[1].MidPoint(singleFrameResult.HeadPoints[3]);
-            PointF headPoint = singleFrameResult.HeadPoint;
-            //singleFrameResult.HeadPoint = headPoint;
-            singleFrameResult.Orientation = new Vector(headPoint.X - midPoint.X, headPoint.Y - midPoint.Y);
+            try
+            {
+                PointF midPoint = singleFrameResult.HeadPoints[1].MidPoint(singleFrameResult.HeadPoints[3]);
+                PointF headPoint = singleFrameResult.HeadPoint;
+                //singleFrameResult.HeadPoint = headPoint;
+                singleFrameResult.Orientation = new Vector(headPoint.X - midPoint.X, headPoint.Y - midPoint.Y);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
         }
 
         private void UpdateSingleFrameResult(ISingleFrameResult singleFrame, ISingleFrameResult previousFrame, double frameRate)
@@ -1616,6 +1500,7 @@ namespace AutomatedRodentTracker.Model.Results
             singleFrame.Distance = dist;
             singleFrame.Velocity = dist * frameRate;
             singleFrame.CentroidVelocity = centroidDist*frameRate;
+            singleFrame.CentroidDistance = centroidDist;
             Vector up = new Vector(0, 1);
             double angle1 = Vector.AngleBetween(singleFrame.Orientation, up);
             double angle2 = Vector.AngleBetween(previousFrame.Orientation, up);
@@ -1626,6 +1511,7 @@ namespace AutomatedRodentTracker.Model.Results
         private void GenerateMotionTrack()
         {
             List<PointF> motionTrack = new List<PointF>();
+            List<PointF> centroidMotionTrack = new List<PointF>();
             List<Vector> orientationTrack = new List<Vector>();
             int startOffset = 0;
             bool inStart = true;
@@ -1640,6 +1526,14 @@ namespace AutomatedRodentTracker.Model.Results
                     orientationTrack.Add(dir);
 
                     motionTrack.Add(headPoints[2]);
+
+                    PointF centroid = Results[i].Centroid;
+
+                    if (!centroid.IsEmpty)
+                    {
+                        centroidMotionTrack.Add(centroid);
+                    }
+
                     inStart = false;
                 }
                 else if (inStart)
@@ -1649,7 +1543,7 @@ namespace AutomatedRodentTracker.Model.Results
             }
 
             UpdateSmoothing(motionTrack, startOffset);
-
+            CentroidMotionTrack = centroidMotionTrack.ToArray();
             OrientationTrack = orientationTrack.ToArray();
             GenerateBehaviouralAnalysis(MotionTrack, startOffset);
         }
@@ -2230,6 +2124,77 @@ namespace AutomatedRodentTracker.Model.Results
             {
                 return 0;
             }
+        }
+
+        public object[,] GetResults()
+        {
+            object[,] data = new object[Results.Count + 6, 13];
+
+            data[0, 0] = "Frame";
+            data[0, 1] = "X";
+            data[0, 2] = "Y";
+            data[0, 3] = "Centroid X: ";
+            data[0, 4] = "Centroid Y: ";
+
+            for (int j = 1; j <= Results.Count; j++)
+            {
+                PointF cPoint = Results[j - 1].Centroid;
+
+                if (!cPoint.IsEmpty)
+                {
+                    data[j, 3] = cPoint.X;
+                    data[j, 4] = cPoint.Y;
+                }
+                else
+                {
+                    data[j, 3] = "null";
+                    data[j, 4] = "null";
+                }
+
+                PointF[] headPoints = Results[j - 1].HeadPoints;
+
+                if (headPoints == null)
+                {
+                    data[j, 0] = j - 1;
+                    data[j, 1] = "null";
+                    data[j, 2] = "null";
+                    continue;
+                }
+
+                PointF point = Results[j - 1].HeadPoints[2];
+                data[j, 0] = j - 1;
+                data[j, 1] = point.X;
+                data[j, 2] = point.Y;
+            }
+
+            data[0, 6] = "Distance Travelled: ";
+            data[0, 7] = DistanceTravelled;
+            data[1, 6] = "Centroid Distance Travelled: ";
+            data[1, 7] = CentroidDistanceTravelled;
+            data[2, 6] = "Average Speed: ";
+            data[2, 7] = AverageVelocity;
+            data[3, 6] = "Max Speed: ";
+            data[3, 7] = MaxSpeed;
+            data[4, 6] = "Average Centroid Velocity: ";
+            data[4, 7] = AverageCentroidVelocity;
+            data[5, 6] = "Max Centroid Velocity: ";
+            data[5, 7] = MaxCentroidSpeed;
+            data[6, 6] = "Average Angular Velocity: ";
+            data[6, 7] = AverageAngularVelocity;
+            data[7, 6] = "Max Angular Velocity: ";
+            data[7, 7] = MaxAngularVelocty;
+            data[8, 6] = "Distance per Frame: ";
+            data[8, 7] = DistanceTravelled / HeadPointDuration;
+            data[9, 6] = "Centroid Distance per Frame: ";
+            data[9, 7] = CentroidDistanceTravelled / CentroidDuration;
+            data[10, 6] = "Start Frame: ";
+            data[10, 7] = StartFrame;
+            data[11, 6] = "End Frame: ";
+            data[11, 7] = EndFrame;
+            data[12, 6] = "Duration: ";
+            data[12, 7] = Duration;
+
+            return data;
         }
     }
 

@@ -1,0 +1,15 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/AutomatedRodentTracker/ARTKey.pfx
+/Builds - Do Not ad to GIT!
+/ART/x64
+/ART/AutomatedRodentTracker.exe.config
+/ART/Emgu.CV.World.dll
+/ART/Emgu.CV.UI.GL.dll
+/ART/Emgu.CV.UI.dll
+/ART/AutomatedRodentTracker.vshost.exe.config
+/ART/AutomatedRodentTracker.vshost.exe
+/ART/AutomatedRodentTracker.pdb
+/ART/UserGuide.pdf

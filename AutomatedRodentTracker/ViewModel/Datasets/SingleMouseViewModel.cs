@@ -23,9 +23,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Xml.Serialization;
 using AutomatedRodentTracker.Commands;
 using AutomatedRodentTracker.Model.Resolver;
 using AutomatedRodentTracker.Model.Results;
+using AutomatedRodentTracker.Model.Video;
 using AutomatedRodentTracker.ModelInterface.Boundries;
 using AutomatedRodentTracker.Services.RBSK;
 using Emgu.CV;
@@ -494,6 +496,18 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
             {
                 ProgressDictionary.TryAdd(file, 0);
             }
+            int fileCount = ProgressDictionary.Count;
+            double totalProgress = ProgressDictionary.Values.Sum();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Progress = (totalProgress / fileCount) * 100;
+            });
+        }
+
+        public string ArtFile
+        {
+            get;
+            set;
         }
 
         public void RunFiles(string outputLocation)
@@ -502,18 +516,14 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
             {
                 outputLocation += "\\";
             }
-
-            //ConcurrentBag<IMouseDataResult> allResults = new ConcurrentBag<IMouseDataResult>();
+            
             Rbsk = new ConcurrentBag<IRBSKVideo>();
             ConcurrentDictionary<ISingleFile, IMouseDataResult> allResults = new ConcurrentDictionary<ISingleFile, IMouseDataResult>();
             List<ISingleFile> files = VideoFiles;
-            Parallel.ForEach(files, new ParallelOptions() { MaxDegreeOfParallelism = 2 }, (file, state) =>
-            //foreach (var file in files)
+            foreach (var file in files)
             {
                 IMouseDataResult result = ModelResolver.Resolve<IMouseDataResult>();
-                //result.Name = $"{Name} - {Id} - {Class} - {file}";
-                result.Name = string.Format("{0} - {1} - {2} - {3}", Name, Id, Class, file);
-                result.Age = Age;
+                result.Name = file.VideoFileName;
                 result.Type = Type;
                 
                 ISaveArtFile save = ModelResolver.Resolve<ISaveArtFile>();
@@ -532,11 +542,43 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
                     artFile = outputLocation + fileName;
                 }
 
+                ArtFile = artFile;
+
                 if (File.Exists(artFile))
                 {
+                    XmlSerializer serializer = new XmlSerializer(typeof(TrackedVideoXml));
+                    TrackedVideoXml trackedVideoXml;
+                    using (StreamReader reader = new StreamReader(artFile))
+                    {
+                        trackedVideoXml = (TrackedVideoXml)serializer.Deserialize(reader);
+                    }
+
+                    ITrackedVideo trackedVideo = trackedVideoXml.GetData();
+                    
+                    result.Boundaries = trackedVideo.Boundries;
+                    result.VideoOutcome = trackedVideo.Result;
+                    result.GapDistance = trackedVideo.GapDistance;
+                    result.ThresholdValue = trackedVideo.ThresholdValue;
+                    result.ThresholdValue2 = trackedVideo.ThresholdValue2;
+                    result.StartFrame = trackedVideo.StartFrame;
+                    result.EndFrame = trackedVideo.EndFrame;
+                    result.SmoothMotion = trackedVideo.SmoothMotion;
+                    result.FrameRate = trackedVideo.FrameRate;
+                    result.UnitsToMilimeters = trackedVideo.UnitsToMilimeters;
+                    result.SmoothFactor = 0.68;
+                    result.GenerateResults(artFile);
+                    result.PelvicArea = trackedVideo.PelvicArea1;
+                    result.PelvicArea2 = trackedVideo.PelvicArea2;
+                    result.PelvicArea3 = trackedVideo.PelvicArea3;
+                    result.PelvicArea4 = trackedVideo.PelvicArea4;
+                    result.Results = trackedVideo.Results;
+                    result.GenerateResults();
+                    result.DataLoadComplete();
+                    
+                    allResults.TryAdd(file, result);
+
                     UpdateProgress(file, 1);
-                    return;
-                    //continue;
+                    continue;
                 }
 
                 try
@@ -554,18 +596,12 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
                             allResults.TryAdd(file, result);
                             UpdateProgress(file, 1);
                             save.SaveFile(artFile, videoFile, result);
-                            return;
-                            //continue;
+                            continue;
                         }
 
                         result.FrameRate = video.FrameRate;
                         video.SetFrame(0);
-                        //int threshold = 20;
-                        //using (var temp = video.GetGrayFrameImage())
-                        //{
-                        //    threshold = (int)CalculateOtsu(temp) + 10;
-                        //}
-
+                        
                         videoSettings.FileName = file.VideoFileName;
                         videoSettings.ThresholdValue = ThresholdValue;
 
@@ -585,8 +621,7 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
 
                         if (Stop)
                         {
-                            state.Stop();
-                            //return;
+                            return;
                         }
 
                         result.GapDistance = rbskVideo.GapDistance;
@@ -596,7 +631,7 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
 
                         result.Results = rbskVideo.HeadPoints;
                         result.ResetFrames();
-                        result.FrameRate = FrameRate;
+                        //result.FrameRate = FrameRate;
                         result.SmoothMotion = SmoothMotion;
                         result.GenerateResults();
                         result.VideoOutcome = SingleFileResult.Ok;
@@ -620,16 +655,14 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
 
                 if (Cancel)
                 {
-                    state.Break();
-                    //break;
+                    break;
                 }
 
                 if (Stop)
                 {
-                    state.Stop();
-                    //return;
+                    return;
                 }
-            });
+            }
 
             if (Stop)
             {
@@ -659,7 +692,7 @@ namespace AutomatedRodentTracker.ViewModel.Datasets
 
         private void ReviewFiles()
         {
-            ReviewWindowViewModel viewModel = new ReviewWindowViewModel(Model, Results);
+            ReviewWindowViewModel viewModel = new ReviewWindowViewModel(Model, Results, ArtFile);
             ReviewView view = new ReviewView();
             view.DataContext = viewModel;
             view.ShowDialog();

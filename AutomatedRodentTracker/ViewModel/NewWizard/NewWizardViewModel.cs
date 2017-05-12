@@ -393,36 +393,25 @@ namespace AutomatedRodentTracker.ViewModel.NewWizard
                 NotifyPropertyChanged();
             }
         }
-
-        private double m_GapDistance;
+        
         public double GapDistance
         {
             get
             {
-                //return VideoSettings.GapDistance;
-                return m_GapDistance;
+                return VideoSettings.GapDistance;
             }
             set
             {
-                if (Equals(m_GapDistance, value))
+                if (Equals(VideoSettings.GapDistance))
                 {
                     return;
                 }
 
-                m_GapDistance = value;
+                VideoSettings.GapDistance = value;
 
                 NotifyPropertyChanged();
 
                 UpdateGapDistance();
-
-                //if (Equals(VideoSettings.GapDistance))
-                //{
-                //    return;
-                //}
-
-                //VideoSettings.GapDistance = value;
-
-                //NotifyPropertyChanged();
             }
         }
 

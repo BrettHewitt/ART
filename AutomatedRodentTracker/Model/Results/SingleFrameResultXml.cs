@@ -129,14 +129,15 @@ namespace AutomatedRodentTracker.Model.Results
 
         public SingleFrameResultXml(ISingleFrameResult result)
         {
-            HeadPoints = result.HeadPoints.Select(x => new PointFXml(x.X, x.Y)).ToArray();
 
-            if (HeadPoints == null)
+            if (result.HeadPoints == null)
             {
+                HeadPoints = null;
                 HeadPoint = null;
             }
             else
             {
+                HeadPoints = result.HeadPoints.Select(x => new PointFXml(x.X, x.Y)).ToArray();
                 HeadPoint = HeadPoints[2];
             }
 

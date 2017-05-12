@@ -29,10 +29,10 @@ namespace AutomatedRodentTracker.Model.Datasets
         private string m_Name;
         private string m_Id;
         private ITypeBase m_Type = ModelResolver.Resolve<IUndefined>();
-        private List<string> m_Videos; 
+        private List<string> m_Videos = new List<string>(); 
         private string m_Class;
         private int m_Age;
-        private List<ISingleFile> m_VideoFiles;
+        private List<ISingleFile> m_VideoFiles = new List<ISingleFile>();
         private Dictionary<ISingleFile, IMouseDataResult> m_Results; 
 
         public string Name
@@ -185,6 +185,18 @@ namespace AutomatedRodentTracker.Model.Datasets
 
                 MarkAsDirty();
             }
+        }
+
+        public void AddFile(ISingleFile file)
+        {
+            VideoFiles.Add(file);
+            Videos.Add(file.VideoFileName);
+        }
+
+        public void RemoveFile(ISingleFile file)
+        {
+            VideoFiles.Remove(file);
+            Videos.Remove(file.VideoFileName);
         }
         
         public void GenerateFiles(string fileLocation)

@@ -72,5 +72,9 @@ namespace AutomatedRodentTracker.ModelInterface.Datasets
         }
 
         void GenerateFiles(string fileLocation);
+
+        void AddFile(ISingleFile file);
+
+        void RemoveFile(ISingleFile file);
     }
 }

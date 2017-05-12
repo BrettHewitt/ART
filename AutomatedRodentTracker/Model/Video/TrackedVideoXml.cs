@@ -222,7 +222,7 @@ namespace AutomatedRodentTracker.Model.Video
             
         }
 
-        public TrackedVideoXml(string fileName, SingleFileResult result, DictionaryXml<int, SingleFrameResultXml> results, PointFXml[] motionTrack, PointFXml[] smoothedMotionTrack, VectorXml[] orientationTrack, BoundaryBaseXml[] boundries, BehaviourHolderXml[] events, DictionaryXml<BoundaryBaseXml, BehaviourHolderXml[]> interactingBoundries, double minInteractionDistance, double gapDistance, int thresholdValue, int thresholdValue2, int startFrame, int endFrame, double frameRate, bool smoothMotion, double smoothingFactor, double centroidSize, double pelvicArea1, double pelvicArea2, double pelvicArea3, double pelvicArea4, RectangleXml roi, string message = "")
+        public TrackedVideoXml(string fileName, SingleFileResult result, DictionaryXml<int, SingleFrameResultXml> results, PointFXml[] motionTrack, PointFXml[] smoothedMotionTrack, VectorXml[] orientationTrack, BoundaryBaseXml[] boundries, BehaviourHolderXml[] events, DictionaryXml<BoundaryBaseXml, BehaviourHolderXml[]> interactingBoundries, double minInteractionDistance, double gapDistance, int thresholdValue, int thresholdValue2, int startFrame, int endFrame, double frameRate, bool smoothMotion, double smoothingFactor, double centroidSize, double pelvicArea1, double pelvicArea2, double pelvicArea3, double pelvicArea4, double unitsToMilimeters, RectangleXml roi, string message = "")
         {
             FileName = fileName;
             Result = result;
@@ -247,6 +247,7 @@ namespace AutomatedRodentTracker.Model.Video
             PelvicArea2 = pelvicArea2;
             PelvicArea3 = pelvicArea3;
             PelvicArea4 = pelvicArea4;
+            UnitsToMilimeters = unitsToMilimeters;
             ROI = roi;
             Message = message;
         }
@@ -265,6 +266,7 @@ namespace AutomatedRodentTracker.Model.Video
             trackedVideo.PelvicArea2 = PelvicArea2;
             trackedVideo.PelvicArea3 = PelvicArea3;
             trackedVideo.PelvicArea4 = PelvicArea4;
+            trackedVideo.UnitsToMilimeters = UnitsToMilimeters;
             trackedVideo.Message = Message;
 
             if (Results != null)

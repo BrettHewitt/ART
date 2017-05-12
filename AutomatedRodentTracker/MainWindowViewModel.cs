@@ -888,187 +888,94 @@ namespace AutomatedRodentTracker
                 return;
             }
 
-            object[,] data = new object[Results.Count + 6, 5];
-
-            data[0, 0] = "Frame";
-            data[0, 1] = "X";
-            data[0, 2] = "Y";
-            data[0, 3] = "cX";
-            data[0, 4] = "cY";
-
-            PointF previousPoint = PointF.Empty;
-            double distanceCounter = 0;
-            
-            double maxAngularVelocity = 0;
-            double maxDistInOneFrame = 0;
-            Vector? previousDir = null;
-            int arrayDelta = 0;
-            for (int j = 1; j <= Results.Count; j++)
-            {
-                PointF[] headPoints = Results[j - 1].HeadPoints;
-                PointF cPoint = Results[j - 1].Centroid;
-
-                if (!cPoint.IsEmpty)
-                {
-                    data[j, 3] = cPoint.X;
-                    data[j, 4] = cPoint.Y;
-                }
-                else
-                {
-                    data[j, 3] = "null";
-                    data[j, 4] = "null";
-                }
-
-                if (headPoints == null)
-                {
-                    data[j, 0] = j - 1;
-                    data[j, 1] = "null";
-                    data[j, 2] = "null";
-                    arrayDelta = j;
-                    continue;
-                }
-
-                PointF point = Results[j - 1].HeadPoints[2];
-                data[j, 0] = j - 1;
-                data[j, 1] = point.X;
-                data[j, 2] = point.Y;
-
-                if (!previousPoint.IsEmpty)
-                {
-                    double currentDist = point.Distance(previousPoint);
-                    distanceCounter += currentDist;
-
-                    if (currentDist > maxDistInOneFrame)
-                    {
-                        maxDistInOneFrame = currentDist;
-                    }
-                }
-                previousPoint = point;
-
-                int index = j - 1 - arrayDelta;
-                if (index >= OrientationTrack.Length)
-                {
-                    continue;
-                }
-
-                Vector currentDir = OrientationTrack[index];
-                if (previousDir.HasValue)
-                {
-                    double angularVelocity = Vector.AngleBetween(currentDir, previousDir.Value);
-                    if (angularVelocity > maxAngularVelocity)
-                    {
-                        maxAngularVelocity = angularVelocity;
-                    }
-                }
-
-                previousDir = currentDir;
-            }
-
-            maxAngularVelocity *= Video.FrameRate;
-            double time = MotionTrack.Length / Video.FrameRate;
-            double maxSpeed = maxDistInOneFrame*Video.FrameRate;
-            double avgSpeed = distanceCounter/time;
-
-            data[Results.Count + 1, 0] = "Distance Travelled: ";
-            data[Results.Count + 1, 1] = distanceCounter;
-            data[Results.Count + 2, 0] = "Average Speed: ";
-            data[Results.Count + 2, 1] = avgSpeed;
-            data[Results.Count + 3, 0] = "Max Speed: ";
-            data[Results.Count + 3, 1] = maxSpeed;
-            data[Results.Count + 4, 0] = "Max Angular Velocity: ";
-            data[Results.Count + 4, 1] = maxAngularVelocity;
-            data[Results.Count + 5, 0] = "Distance per Frame";
-            data[Results.Count + 5, 1] = distanceCounter/MotionTrack.Length;
-
-            ExcelService.WriteData(data, saveLocation);
+            ExportRawData(saveLocation);
         }
 
         private void ExportRawData(string saveLocation)
         {
-            if (string.IsNullOrWhiteSpace(saveLocation))
-            {
-                return;
-            }
+            //object[,] data = new object[Results.Count + 6, 13];
+            
 
-            object[,] data = new object[Results.Count + 6, 3];
+            //data[0, 0] = "Frame";
+            //data[0, 1] = "X";
+            //data[0, 2] = "Y";
+            //data[0, 3] = "Centroid X: ";
+            //data[0, 4] = "Centroid Y: ";
 
-            data[0, 0] = "Frame";
-            data[0, 1] = "X";
-            data[0, 2] = "Y";
+            IMouseDataResult result = ModelResolver.Resolve<IMouseDataResult>();
+            result.Boundaries = Boundries.Select(x => x.Model).ToArray();
+            //result.VideoOutcome = Result;
+            result.FrameRate = FrameRate;
+            result.UnitsToMilimeters = 1;
+            result.SmoothFactor = 0.68;
+            result.Results = Results;
+            result.StartFrame = 0;
+            result.EndFrame = Video.FrameCount - 1;
+            result.FrameRate = Video.FrameRate;
+            result.GenerateResults();
+            result.DataLoadComplete();
 
-            PointF previousPoint = PointF.Empty;
-            double distanceCounter = 0;
+            object[,] data = result.GetResults();
 
-            double maxAngularVelocity = 0;
-            double maxDistInOneFrame = 0;
-            Vector? previousDir = null;
-            int arrayDelta = 0;
-            for (int j = 1; j <= Results.Count; j++)
-            {
-                PointF[] headPoints = Results[j - 1].HeadPoints;
-                //PointF point = PointF.Empty;
-                if (headPoints == null)
-                {
-                    data[j, 0] = j - 1;
-                    data[j, 1] = "null";
-                    data[j, 2] = "null";
-                    arrayDelta = j;
-                    continue;
-                }
 
-                PointF point = Results[j - 1].HeadPoints[2];
-                data[j, 0] = j - 1;
-                data[j, 1] = point.X;
-                data[j, 2] = point.Y;
+            //for (int j = 1; j <= Results.Count; j++)
+            //{
+            //    PointF[] headPoints = Results[j - 1].HeadPoints;
+            //    PointF cPoint = Results[j - 1].Centroid;
 
-                if (!previousPoint.IsEmpty)
-                {
-                    double currentDist = point.Distance(previousPoint);
-                    distanceCounter += currentDist;
+            //    if (!cPoint.IsEmpty)
+            //    {
+            //        data[j, 3] = cPoint.X;
+            //        data[j, 4] = cPoint.Y;
+            //    }
+            //    else
+            //    {
+            //        data[j, 3] = "null";
+            //        data[j, 4] = "null";
+            //    }
 
-                    if (currentDist > maxDistInOneFrame)
-                    {
-                        maxDistInOneFrame = currentDist;
-                    }
-                }
-                previousPoint = point;
+            //    if (headPoints == null)
+            //    {
+            //        data[j, 0] = j - 1;
+            //        data[j, 1] = "null";
+            //        data[j, 2] = "null";
+            //        continue;
+            //    }
 
-                int index = j - 1 - arrayDelta;
-                if (index >= OrientationTrack.Length)
-                {
-                    continue;
-                }
+            //    PointF point = Results[j - 1].HeadPoints[2];
+            //    data[j, 0] = j - 1;
+            //    data[j, 1] = point.X;
+            //    data[j, 2] = point.Y;
+            //}
 
-                Vector currentDir = OrientationTrack[index];
-                if (previousDir.HasValue)
-                {
-                    double angularVelocity = Vector.AngleBetween(currentDir, previousDir.Value);
-                    if (angularVelocity > maxAngularVelocity)
-                    {
-                        maxAngularVelocity = angularVelocity;
-                    }
-                }
+            //data[0, 6] = "Distance Travelled: ";
+            //data[0, 7] = result.DistanceTravelled;
+            //data[1, 6] = "Centroid Distance Travelled: ";
+            //data[1, 7] = result.CentroidDistanceTravelled;
+            //data[2, 6] = "Average Speed: ";
+            //data[2, 7] = result.AverageVelocity;
+            //data[3, 6] = "Max Speed: ";
+            //data[3, 7] = result.MaxSpeed;
+            //data[4, 6] = "Average Centroid Velocity: ";
+            //data[4, 7] = result.AverageCentroidVelocity;
+            //data[5, 6] = "Max Centroid Velocity: ";
+            //data[5, 7] = result.MaxCentroidSpeed;
+            //data[6, 6] = "Average Angular Velocity: ";
+            //data[6, 7] = result.AverageAngularVelocity;
+            //data[7, 6] = "Max Angular Velocity: ";
+            //data[7, 7] = result.MaxAngularVelocty;
+            //data[8, 6] = "Distance per Frame: ";
+            //data[8, 7] = result.DistanceTravelled / result.HeadPointDuration;
+            //data[9, 6] = "Centroid Distance per Frame: ";
+            //data[9, 7] = result.CentroidDistanceTravelled/result.CentroidDuration;
+            //data[10, 6] = "Start Frame: ";
+            //data[10, 7] = result.StartFrame;
+            //data[11, 6] = "End Frame: ";
+            //data[11, 7] = result.EndFrame;
+            //data[12, 6] = "Duration: ";
+            //data[12, 7] = result.Duration;
 
-                previousDir = currentDir;
-            }
-
-            maxAngularVelocity *= Video.FrameRate;
-            double time = MotionTrack.Length / Video.FrameRate;
-            double maxSpeed = maxDistInOneFrame * Video.FrameRate;
-            double avgSpeed = distanceCounter / time;
-
-            data[Results.Count + 1, 0] = "Distance Travelled: ";
-            data[Results.Count + 1, 1] = distanceCounter;
-            data[Results.Count + 2, 0] = "Average Speed: ";
-            data[Results.Count + 2, 1] = avgSpeed;
-            data[Results.Count + 3, 0] = "Max Speed: ";
-            data[Results.Count + 3, 1] = maxSpeed;
-            data[Results.Count + 4, 0] = "Max Angular Velocity: ";
-            data[Results.Count + 4, 1] = maxAngularVelocity;
-            data[Results.Count + 5, 0] = "Distance per Frame";
-            data[Results.Count + 5, 1] = distanceCounter / MotionTrack.Length;
-
-            ExcelService.WriteData(data, saveLocation);
+            ExcelService.WriteData(data, saveLocation, false);
         }
 
         private bool CanExportRawData()
@@ -1184,6 +1091,11 @@ namespace AutomatedRodentTracker
             int yPos = Events.Count + 1;
             foreach (List<object> list in boundaries)
             {
+                if (!list.Any())
+                {
+                    continue;
+                }
+
                 data[yPos, 0] = list[0];
                 data[yPos, 1] = list[1];
                 data[yPos, 2] = list[2];
@@ -1477,7 +1389,7 @@ namespace AutomatedRodentTracker
             DictionaryXml<BoundaryBaseXml, BehaviourHolderXml[]> interactionBoundries = new DictionaryXml<BoundaryBaseXml, BehaviourHolderXml[]>(keys, values);
             RectangleXml roiXml = new RectangleXml(ROI);
 
-            TrackedVideoXml filXml = new TrackedVideoXml(WorkingFile, SingleFileResult.Ok, results, motionTrack, smoothedMotionTrackXml, orientationTrack, boundries.ToArray(), events.ToArray(), interactionBoundries, VideoSettings.MinimumInteractionDistance, VideoSettings.GapDistance, VideoSettings.ThresholdValue, VideoSettings.ThresholdValue2, 0, Video.FrameCount - 1, FrameRate, false, 0.68, 0, 0, 0, 0, 0, roiXml);
+            TrackedVideoXml filXml = new TrackedVideoXml(WorkingFile, SingleFileResult.Ok, results, motionTrack, smoothedMotionTrackXml, orientationTrack, boundries.ToArray(), events.ToArray(), interactionBoundries, VideoSettings.MinimumInteractionDistance, VideoSettings.GapDistance, VideoSettings.ThresholdValue, VideoSettings.ThresholdValue2, 0, Video.FrameCount - 1, FrameRate, false, 0.68, 0, 0, 0, 0, 0, 1, roiXml);
             XmlSerializer serializer = new XmlSerializer(typeof(TrackedVideoXml));
 
             using (StreamWriter writer = new StreamWriter(filePath))

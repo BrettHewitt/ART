@@ -527,6 +527,8 @@ namespace AutomatedRodentTracker.ViewModel.Settings
                 video.SetVideo(Mice.First().VideoFileName);
                 FrameRate = video.FrameRate;
             }
+
+            SelectedMouse = Mice.First();
         }
 
         private void Ok()

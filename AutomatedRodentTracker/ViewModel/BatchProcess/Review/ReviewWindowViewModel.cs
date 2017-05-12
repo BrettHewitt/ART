@@ -664,6 +664,27 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             }
         }
 
+        private double m_CentroidDistanceTravelled;
+        public double CentroidDistanceTravelled
+        {
+            get
+            {
+                return m_CentroidDistanceTravelled;
+            }
+            set
+            {
+                if (Equals(m_CentroidDistanceTravelled, value))
+                {
+                    return;
+                }
+
+                m_CentroidDistanceTravelled = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
+
         private bool m_SmoothMotion;
         public bool SmoothMotion
         {
@@ -687,7 +708,6 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
                     CurrentResult.SmoothMotion = value;
                     SmoothMotionChanged();
                 }
-                
             }
         }
 
@@ -710,6 +730,27 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
                 NotifyPropertyChanged();
             }
         }
+
+        private PointF[] m_CentroidMotionTrack;
+        public PointF[] CentroidMotionTrack
+        {
+            get
+            {
+                return m_CentroidMotionTrack;
+            }
+            set
+            {
+                if (Equals(m_CentroidMotionTrack, value))
+                {
+                    return;
+                }
+
+                m_CentroidMotionTrack = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
 
         private double m_SmoothingValue = 0.68;
         public double SmoothingValue
@@ -795,6 +836,27 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             }
         }
 
+        private double m_AvgCentroidVelocity;
+        public double AvgCentroidVelocity
+        {
+            get
+            {
+                return m_AvgCentroidVelocity;
+            }
+            set
+            {
+                if (Equals(m_AvgCentroidVelocity, value))
+                {
+                    return;
+                }
+
+                m_AvgCentroidVelocity = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
+
         private double m_AvgAngularVelocity;
         public double AvgAngularVelocity
         {
@@ -814,6 +876,67 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
                 NotifyPropertyChanged();
             }
         }
+
+        private double m_MaxVelocity;
+        public double MaxVelocity
+        {
+            get
+            {
+                return m_MaxVelocity;
+            }
+            set
+            {
+                if (Equals(m_MaxVelocity, value))
+                {
+                    return;
+                }
+
+                m_MaxVelocity = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
+        private double m_MaxCentroidVelocity;
+        public double MaxCentroidVelocity
+        {
+            get
+            {
+                return m_MaxCentroidVelocity;
+            }
+            set
+            {
+                if (Equals(m_MaxCentroidVelocity, value))
+                {
+                    return;
+                }
+
+                m_MaxCentroidVelocity = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
+        private double m_MaxAngularVelocity;
+        public double MaxAngularVelocity
+        {
+            get
+            {
+                return m_MaxAngularVelocity;
+            }
+            set
+            {
+                if (Equals(m_MaxAngularVelocity, value))
+                {
+                    return;
+                }
+
+                m_MaxAngularVelocity = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
 
         private double m_CentroidSize;
         public double CentroidSize
@@ -968,13 +1091,35 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             }
         }
 
-        public ReviewWindowViewModel(ISingleMouse model, Dictionary<ISingleFile, IMouseDataResult> results)
+        private string m_ArtFile;
+        public string ArtFile
+        {
+            get
+            {
+                return m_ArtFile;
+            }
+            set
+            {
+                if (Equals(m_ArtFile, value))
+                {
+                    return;
+                }
+
+                m_ArtFile = value;
+
+                NotifyPropertyChanged();
+            }
+        }
+
+
+        public ReviewWindowViewModel(ISingleMouse model, Dictionary<ISingleFile, IMouseDataResult> results, string artFile)
         {
             ObservableCollection<SingleFileViewModel> videos = new ObservableCollection<SingleFileViewModel>();
             foreach (ISingleFile singleFile in model.VideoFiles)
             {
-                SingleFileViewModel vm = new SingleFileViewModel(singleFile, "");
+                SingleFileViewModel vm = new SingleFileViewModel(singleFile, artFile);
                 IMouseDataResult data = results[singleFile];
+
                 if (data != null)
                 {
                     vm.VideoOutcome = data.VideoOutcome;
@@ -994,7 +1139,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             SingleFiles = videos;
             Model = model;
             Results = results;
-
+            ArtFile = artFile;
             GapDistanceMin = 5;
             GapDistanceMax = 300;
             BinaryThresholdMin = 0;
@@ -1005,6 +1150,8 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             Name = Model.Name;
             Age = Model.Age;
             Type = Model.Type;
+
+            SelectedVideo = SingleFiles.First();
         }
 
         private void SelectedVideoChanged()
@@ -1035,12 +1182,17 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
                 AnalyseStart = CurrentResult.StartFrame;
                 AnalyseEnd = CurrentResult.EndFrame;
                 DistanceTravelled = CurrentResult.DistanceTravelled;
+                CentroidDistanceTravelled = CurrentResult.CentroidDistanceTravelled;
                 MotionTrack = CurrentResult.MotionTrack;
+                CentroidMotionTrack = CurrentResult.CentroidMotionTrack;
                 FrameRate = CurrentResult.FrameRate;
-                SmoothMotion = CurrentResult.SmoothMotion;
                 Duration = CurrentResult.Duration;
                 AvgVelocity = CurrentResult.AverageVelocity;
+                AvgCentroidVelocity = CurrentResult.AverageCentroidVelocity;
                 AvgAngularVelocity = CurrentResult.AverageAngularVelocity;
+                MaxVelocity = CurrentResult.MaxSpeed;
+                MaxCentroidVelocity = CurrentResult.MaxCentroidSpeed;
+                MaxAngularVelocity = CurrentResult.MaxAngularVelocty;
                 CentroidSize = CurrentResult.CentroidSize;
 
                 List<BehaviourHolderViewModel> behaviours = new List<BehaviourHolderViewModel>();
@@ -1067,6 +1219,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
                 //}
                 
                 SliderValue = 0;
+                SmoothMotion = CurrentResult.SmoothMotion;
             }
             else
             {
@@ -1087,6 +1240,19 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             using (Image<Bgr, Byte> img = CurrentImage.Clone())
             {
                 img.DrawPolyline(MotionTrack.Select(x => x.ToPoint()).ToArray(), false, new Bgr(Color.Blue), 2);
+                img.DrawPolyline(CentroidMotionTrack.Select(x => x.ToPoint()).ToArray(), false, new Bgr(Color.Yellow), 2);
+
+                if (SliderValue >= AnalyseStart && SliderValue <= AnalyseEnd)
+                {
+                    ISingleFrameResult frame = CurrentResult.Results[SliderValue];
+
+                    if (!frame.HeadPoint.IsEmpty)
+                    {
+                        img.Draw(new CircleF(frame.HeadPoint, 2), new Bgr(Color.Red), 2);
+                        img.Draw(new CircleF(frame.Centroid, 2), new Bgr(Color.Red), 2);
+                    }
+                }
+                
                 DisplayImage = ImageService.ToBitmapSource(img);
             }
         }
@@ -1302,11 +1468,13 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
+                        result.ResetFrames();
                         Results[SelectedVideo.Model] = result;
                         CurrentResult = result;
                         SliderValueChanged();
                         SaveCommand.RaiseCanExecuteChangedNotification();
                         viewModel.ProgressValue = 1;
+                        SelectedVideoChanged();
                     });
                 }
                 catch (Exception e)
@@ -1350,16 +1518,34 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
 
         private void SaveFile()
         {
-            string saveFile = FileBrowser.SaveFile("ART|*.art");
-
-            if (string.IsNullOrWhiteSpace(saveFile))
+            if (File.Exists(ArtFile))
             {
-                return;
-            }
+                var result = MessageBox.Show("Would you like to overwrite the original file?", "Overwrite?", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
-            ISaveArtFile save = ModelResolver.Resolve<ISaveArtFile>();
-            string videoFile = SelectedVideo.VideoFileName;
-            save.SaveFile(saveFile, videoFile, CurrentResult);
+                if (result == MessageBoxResult.Cancel)
+                {
+                    return;
+                }
+
+                ISaveArtFile save = ModelResolver.Resolve<ISaveArtFile>();
+                string videoFile = SelectedVideo.VideoFileName;
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    save.SaveFile(ArtFile, videoFile, CurrentResult);
+                }
+                else
+                {
+                    string saveFile = FileBrowser.SaveFile("ART|*.art");
+
+                    if (string.IsNullOrWhiteSpace(saveFile))
+                    {
+                        return;
+                    }
+                    
+                    save.SaveFile(saveFile, videoFile, CurrentResult);
+                }
+            }
         }
 
         private bool CanSaveFile()
@@ -1389,86 +1575,73 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
 
         private void ExportRawData(string saveLocation)
         {
-            Dictionary<int, ISingleFrameResult> results = CurrentResult.Results;
-            PointF[] motionTrack = CurrentResult.MotionTrack;
-            Vector[] orientationTrack = CurrentResult.OrientationTrack;
-            object[,] data = new object[CurrentResult.Results.Count + 6, 3];
+            //Dictionary<int, ISingleFrameResult> results = CurrentResult.Results;
+            //object[,] data = new object[CurrentResult.Results.Count + 6, 11];
 
-            data[0, 0] = "Frame";
-            data[0, 1] = "X";
-            data[0, 2] = "Y";
+            object[,] data = CurrentResult.GetResults();
 
-            PointF previousPoint = PointF.Empty;
-            double distanceCounter = 0;
+            //data[0, 0] = "Frame";
+            //data[0, 1] = "X";
+            //data[0, 2] = "Y";
+            //data[0, 3] = "Centroid X";
+            //data[0, 4] = "Centroid Y";
+            
+            //for (int j = 1; j <= results.Count; j++)
+            //{
+            //    PointF centroid = results[j - 1].Centroid;
 
-            double maxAngularVelocity = 0;
-            double maxDistInOneFrame = 0;
-            Vector? previousDir = null;
-            int arrayDelta = 0;
-            for (int j = 1; j <= results.Count; j++)
-            {
-                PointF[] headPoints = results[j - 1].HeadPoints;
-                //PointF point = PointF.Empty;
-                if (headPoints == null)
-                {
-                    data[j, 0] = j - 1;
-                    data[j, 1] = "null";
-                    data[j, 2] = "null";
-                    arrayDelta = j;
-                    continue;
-                }
+            //    if (centroid.IsEmpty)
+            //    {
+            //        data[j, 3] = "null";
+            //        data[j, 4] = "null";
+            //    }
+            //    else
+            //    {
+            //        data[j, 3] = centroid.X;
+            //        data[j, 4] = centroid.Y;
+            //    }
 
-                PointF point = results[j - 1].HeadPoints[2];
-                data[j, 0] = j - 1;
-                data[j, 1] = point.X;
-                data[j, 2] = point.Y;
+            //    PointF[] headPoints = results[j - 1].HeadPoints;
+            //    //PointF point = PointF.Empty;
+            //    if (headPoints == null)
+            //    {
+            //        data[j, 0] = j - 1;
+            //        data[j, 1] = "null";
+            //        data[j, 2] = "null";
+            //        continue;
+            //    }
 
-                if (!previousPoint.IsEmpty)
-                {
-                    double currentDist = point.Distance(previousPoint);
-                    distanceCounter += currentDist;
+            //    PointF point = results[j - 1].HeadPoints[2];
+            //    data[j, 0] = j - 1;
+            //    data[j, 1] = point.X;
+            //    data[j, 2] = point.Y;
+            //}
 
-                    if (currentDist > maxDistInOneFrame)
-                    {
-                        maxDistInOneFrame = currentDist;
-                    }
-                }
-                previousPoint = point;
 
-                int index = j - 1 - arrayDelta;
-                if (index >= orientationTrack.Length)
-                {
-                    continue;
-                }
-
-                Vector currentDir = orientationTrack[index];
-                if (previousDir.HasValue)
-                {
-                    double angularVelocity = Vector.AngleBetween(currentDir, previousDir.Value);
-                    if (angularVelocity > maxAngularVelocity)
-                    {
-                        maxAngularVelocity = angularVelocity;
-                    }
-                }
-
-                previousDir = currentDir;
-            }
-
-            maxAngularVelocity *= Video.FrameRate;
-            double time = motionTrack.Length / Video.FrameRate;
-            double maxSpeed = maxDistInOneFrame * Video.FrameRate;
-            double avgSpeed = distanceCounter / time;
-
-            data[results.Count + 1, 0] = "Distance Travelled: ";
-            data[results.Count + 1, 1] = distanceCounter;
-            data[results.Count + 2, 0] = "Average Speed: ";
-            data[results.Count + 2, 1] = avgSpeed;
-            data[results.Count + 3, 0] = "Max Speed: ";
-            data[results.Count + 3, 1] = maxSpeed;
-            data[results.Count + 4, 0] = "Max Angular Velocity: ";
-            data[results.Count + 4, 1] = maxAngularVelocity;
-            data[results.Count + 5, 0] = "Distance per Frame";
-            data[results.Count + 5, 1] = distanceCounter / motionTrack.Length;
+            //data[0, 6] = "Distance Travelled: ";
+            //data[0, 7] = CurrentResult.DistanceTravelled;
+            //data[1, 6] = "Centroid Distance Travelled: ";
+            //data[1, 7] = CurrentResult.CentroidDistanceTravelled;
+            //data[2, 6] = "Average Speed: ";
+            //data[2, 7] = CurrentResult.AverageVelocity;
+            //data[3, 6] = "Max Speed: ";
+            //data[3, 7] = CurrentResult.MaxSpeed;
+            //data[4, 6] = "Average Centroid Velocity: ";
+            //data[4, 7] = CurrentResult.AverageCentroidVelocity;
+            //data[5, 6] = "Max Centroid Velocity";
+            //data[5, 7] = CurrentResult.MaxCentroidSpeed;
+            //data[6, 6] = "Average Angular Velocity: ";
+            //data[6, 7] = CurrentResult.AverageAngularVelocity;
+            //data[7, 6] = "Max Angular Velocity: ";
+            //data[7, 7] = CurrentResult.MaxAngularVelocty;
+            //data[8, 6] = "Distance per Frame";
+            //data[8, 7] = CurrentResult.DistanceTravelled / CurrentResult.Duration;
+            //data[9, 6] = "Start Frame: ";
+            //data[9, 7] = CurrentResult.StartFrame;
+            //data[10, 6] = "End Frame: ";
+            //data[10, 7] = CurrentResult.EndFrame;
+            //data[11, 6] = "Duration: ";
+            //data[11, 7] = CurrentResult.Duration;
 
             ExcelService.WriteData(data, saveLocation);
         }
@@ -1484,11 +1657,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             CurrentResult.StartFrame = SliderValue;
             CurrentResult.GenerateResults();
 
-            DistanceTravelled = CurrentResult.DistanceTravelled;
-            Duration = CurrentResult.Duration;
-            AvgVelocity = CurrentResult.AverageVelocity;
-            AvgAngularVelocity = CurrentResult.AverageAngularVelocity;
-            CentroidSize = CurrentResult.CentroidSize;
+            UpdateResults();
         }
 
         private bool CanSetStartFrame()
@@ -1501,15 +1670,21 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess.Review
             AnalyseEnd = SliderValue;
             CurrentResult.EndFrame = SliderValue;
             CurrentResult.GenerateResults();
+
             UpdateResults();
         }
 
         private void UpdateResults()
         {
             DistanceTravelled = CurrentResult.DistanceTravelled;
+            CentroidDistanceTravelled = CurrentResult.CentroidDistanceTravelled;
             Duration = CurrentResult.Duration;
             AvgVelocity = CurrentResult.AverageVelocity;
+            AvgCentroidVelocity = CurrentResult.AverageCentroidVelocity;
             AvgAngularVelocity = CurrentResult.AverageAngularVelocity;
+            MaxVelocity = CurrentResult.MaxSpeed;
+            MaxCentroidVelocity = CurrentResult.MaxCentroidSpeed;
+            MaxAngularVelocity = CurrentResult.MaxAngularVelocty;
             CentroidSize = CurrentResult.CentroidSize;
         }
 

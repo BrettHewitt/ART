@@ -25,7 +25,7 @@
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <!--<ColumnDefinition Width="*"/>-->
             </Grid.ColumnDefinitions>
             
             <Grid.RowDefinitions>
@@ -34,36 +34,17 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
-            <Button Content="Load Labbook" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Command="{Binding Path=LoadLabbookCommand}"/>
+            <!--<Button Content="Load Labbook" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Command="{Binding Path=LoadLabbookCommand}"/>-->
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="TG" HorizontalAlignment="Center"/>
+            <!--<TextBlock Grid.Row="0" Grid.Column="0" Text="TG" HorizontalAlignment="Center"/>-->
             <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Path=TgItemsSource}" SelectedItem="{Binding Path=SelectedTgItem, Mode=TwoWay}" HorizontalContentAlignment="Stretch">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
-                        <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding Id}" />
-                        <GridViewColumn Header="Age" Width="50">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Path=Age, Mode=TwoWay}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Class" Width="50" DisplayMemberBinding="{Binding Path=Class}" />
-                        <GridViewColumn Header="Video Count" Width="100" DisplayMemberBinding="{Binding Path=Videos.Count}" />
+                        <GridViewColumn Header="Name" Width="400" DisplayMemberBinding="{Binding Name}" />
                         <GridViewColumn Width="140" Header="Progress">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ProgressBar Maximum="100" Value="{Binding Path=Progress}" Width="120"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="50" Header="Settings">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding Path=SettingsCommand}" Width="25" Height="25">
-                                        <Label Content="S"/>
-                                    </Button>
+                                    <ProgressBar Maximum="100" Value="{Binding Path=Progress, Mode=OneWay}" Width="120"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -90,61 +71,6 @@
                 <Button Content="Remove File" Command="{Binding Path=RemoveTgFileCommand}"/>
                 <Button Content="Clear List" Command="{Binding Path=ClearTgFilesCommand}"/>
             </StackPanel>
-
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="NTG" HorizontalAlignment="Center"/>
-            <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Path=NtgItemsSource}" SelectedItem="{Binding Path=SelectedNtgItem, Mode=TwoWay}">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="Name" Width="200" DisplayMemberBinding="{Binding Name}" />
-                        <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding Id}" />
-                        <GridViewColumn Header="Age" Width="50">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBox Text="{Binding Path=Age, Mode=TwoWay}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Class" Width="50" DisplayMemberBinding="{Binding Path=Class}" />
-                        <GridViewColumn Header="Video Count" Width="100" DisplayMemberBinding="{Binding Path=Videos.Count}" />
-                        <GridViewColumn Width="140" Header="Progress">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ProgressBar Maximum="100" Width="120" Value="{Binding Path=Progress}" HorizontalAlignment="Center"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="50" Header="Settings">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding Path=SettingsCommand}" Width="25" Height="25">
-                                        <Label Content="S"/>
-                                    </Button>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="50" Header="Review">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding Path=ReviewCommand}" Width="25" Height="25">
-                                        <Label Content="R"/>
-                                    </Button>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="IsSelected" Value="{Binding Path=IsSelected}"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
-            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Add File" Command="{Binding Path=AddNtgFileCommand}"/>
-                <Button Content="Add Folder" Command="{Binding Path=AddNtgFolderCommand}"/>
-                <Button Content="Remove File" Command="{Binding Path=RemoveNtgFileCommand}"/>
-                <Button Content="Clear List" Command="{Binding Path=ClearNtgFilesCommand}"/>
-            </StackPanel>
         </Grid>
         
         <Separator Grid.Row="1"/>
@@ -153,7 +79,7 @@
             <Button Content="Set Output Folder" Command="{Binding Path=SetOutputFolderCommand}"/>
             <Button Content="Get Output Folder" Command="{Binding Path=LoadOutputFolderCommand}"/>
             <Button Content="Process" Command="{Binding Path=ProcessCommand}"/>
-            <Button Content="Batch Export" Command="{Binding Path=ExportBatchCommand}"/>
+            <!--<Button Content="Batch Export" Command="{Binding Path=ExportBatchCommand}"/>-->
             <Button Content="Export all" Command="{Binding Path=ExportAllCommand}"/>
             <Button Content="Settings" Command="{Binding Path=BatchSettingsCommand}"/>
         </StackPanel>

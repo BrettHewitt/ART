@@ -302,7 +302,7 @@ namespace AutomatedRodentTracker.Model.RBSK
 
             Services.RBSK.RBSK rbsk = MouseService.GetStandardMouseRules();
 
-            if (GapDistance == 0)
+            if (GapDistance <= 0)
             {
                 GapDistance = GetBestGapDistance(rbsk);
             }
@@ -853,14 +853,14 @@ namespace AutomatedRodentTracker.Model.RBSK
             if (BackgroundImage != null && useBackground)
             {
                 using (Image<Gray, Byte> grayImage = image.Convert<Gray, Byte>())
-                using (Image<Gray, Byte> filteredImage = grayImage.SmoothMedian(rbsk.Settings.FilterLevel))
-                using (Image<Gray, Byte> binaryImage = filteredImage.ThresholdBinary(new Gray(rbsk.Settings.BinaryThreshold), new Gray(255)))
+                //using (Image<Gray, Byte> filteredImage = grayImage.SmoothMedian(rbsk.Settings.FilterLevel))
+                using (Image<Gray, Byte> binaryImage = grayImage.ThresholdBinary(new Gray(rbsk.Settings.BinaryThreshold), new Gray(255)))
                 using (Image<Gray, Byte> backgroundNot = BackgroundImage.Not())
                 using (Image<Gray, Byte> finalImage = binaryImage.Add(backgroundNot))
-                //using (Image<Gray, Byte> finalImageNot = finalImage.Not())
+                using (Image<Gray, Byte> filteredImage = finalImage.SmoothMedian(rbsk.Settings.FilterLevel))
                 {
                     //ImageViewer.Show(finalImage);
-                    PointF[] result = RBSKService.RBSK(finalImage, rbsk);
+                    PointF[] result = RBSKService.RBSK(filteredImage, rbsk);
 
                     IBodyDetection bodyDetection = ModelResolver.Resolve<IBodyDetection>();
                     bodyDetection.BinaryBackground = BackgroundImage;
@@ -873,43 +873,12 @@ namespace AutomatedRodentTracker.Model.RBSK
                         waistArea2 = -1;
                         waistArea3 = -1;
                         waistArea4 = -1;
-                        bodyDetection.GetBody(filteredImage, out centroid);
+                        bodyDetection.GetBody(grayImage, out centroid);
                         return null;
                     }
-
                     
-                    //double vol2, vol3, vol4;
-                    //image.
-
-                    //if (!roi.IsEmpty)
-                    //{
-                    //    image.ROI = roi;
-                    //}
-
-                    //PointF dummy;
-                    bodyDetection.FindBody(filteredImage, out waist, out waistArea, out waistArea2, out waistArea3, out waistArea4, out centroid);
-
-                    //if (!centroid.IsEmpty)
-                    //{
-                    //    ImageViewer.Show(finalImage);
-                    //    Console.WriteLine("Showing");
-                    //}
-
-                    //CvBlobs blobs = new CvBlobs();
-                    //BlobDetector.Detect(finalImage, blobs);
-
-                    //CvBlob mouseBlob = null;
-                    //double maxArea = -1;
-                    //foreach (var blob in blobs.Values)
-                    //{
-                    //    if (blob.Area > maxArea)
-                    //    {
-                    //        mouseBlob = blob;
-                    //        maxArea = blob.Area;
-                    //    }
-                    //}
-                    //waist = -1;
-                    //waistArea = -1;
+                    bodyDetection.FindBody(grayImage, out waist, out waistArea, out waistArea2, out waistArea3, out waistArea4, out centroid);
+                    
                     return result;
                 }
             }
@@ -928,12 +897,12 @@ namespace AutomatedRodentTracker.Model.RBSK
             if (BackgroundImage != null && useBackground)
             {
                 using (Image<Gray, Byte> grayImage = image.Convert<Gray, Byte>())
-                using (Image<Gray, Byte> filteredImage = grayImage.SmoothMedian(rbsk.Settings.FilterLevel))
-                using (Image<Gray, Byte> binaryImage = filteredImage.ThresholdBinary(new Gray(rbsk.Settings.BinaryThreshold), new Gray(255)))
+                using (Image<Gray, Byte> binaryImage = grayImage.ThresholdBinary(new Gray(rbsk.Settings.BinaryThreshold), new Gray(255)))
                 using (Image<Gray, Byte> backgroundNot = BackgroundImage.Not())
                 using (Image<Gray, Byte> finalImage = binaryImage.Add(backgroundNot))
+                using (Image<Gray, Byte> filteredImage = finalImage.SmoothMedian(rbsk.Settings.FilterLevel))
                 {
-                    PointF[] result = RBSKService.RBSK(finalImage, rbsk, previousPoint, movementDelta);
+                    PointF[] result = RBSKService.RBSK(filteredImage, rbsk, previousPoint, movementDelta);
                     return result;
                 }
             }

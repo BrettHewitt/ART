@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see<http://www.gnu.org/licenses/>.*/
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -196,7 +197,9 @@ namespace AutomatedRodentTracker.Services.Excel
             }
 
             excelApp.DisplayAlerts = displayWarnings;
-            Workbook workBook = excelApp.Workbooks.Add(XlWBATemplate.xlWBATWorksheet);
+            Workbooks workbooks = excelApp.Workbooks;
+            Workbook workBook = workbooks.Add(XlWBATemplate.xlWBATWorksheet);
+            
             Worksheet ws = (Worksheet)workBook.Worksheets[1];
 
             int rowCount = data.GetLength(0);
@@ -210,11 +213,64 @@ namespace AutomatedRodentTracker.Services.Excel
                 }
             }
 
+            FileInfo fileInfo = new FileInfo(fileName);
+            while (true)
+            {
+                if (IsFileLocked(fileInfo))
+                {
+                    var result = MessageBox.Show(string.Format("File: {0} is in use by another process, please terminate the process before saving", fileName), "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+
             workBook.SaveAs(fileName);
+            workBook.Close();
             excelApp.Quit();
             Marshal.ReleaseComObject(workBook);
+            Marshal.ReleaseComObject(workbooks);
             Marshal.ReleaseComObject(ws);
+            Marshal.ReleaseComObject(excelApp);
         }
+
+        public static bool IsFileLocked(FileInfo file)
+        {
+            if (!File.Exists(file.Name))
+            {
+                return false;
+            }
+
+            FileStream stream = null;
+
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (IOException)
+            {
+                //the file is unavailable because it is:
+                //still being written to
+                //or being processed by another thread
+                //or does not exist (has already been processed)
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+
+            //file is not locked
+            return false;
+        }
+
 
         public static void WriteDataAsCsv<T>(T[,] data, string fileName, bool displayWarnings = true) where T : class
         {

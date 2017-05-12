@@ -104,6 +104,12 @@ namespace AutomatedRodentTracker.ModelInterface.Results
             set;
         }
 
+        double CentroidDistance
+        {
+            get;
+            set;
+        }
+
         PointF Centroid
         {
             get;

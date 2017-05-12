@@ -60,8 +60,26 @@ namespace AutomatedRodentTracker.ModelInterface.Results
             get;
             set;
         }
-        
+
+        double CentroidDistanceTravelled
+        {
+            get;
+            set;
+        }
+
         double Duration
+        {
+            get;
+            set;
+        }
+
+        double HeadPointDuration
+        {
+            get;
+            set;
+        }
+
+        double CentroidDuration
         {
             get;
             set;
@@ -198,7 +216,14 @@ namespace AutomatedRodentTracker.ModelInterface.Results
             get;
             set;
         }
-        
+
+        PointF[] CentroidMotionTrack
+        {
+            get;
+            set;
+        }
+
+
         Vector[] OrientationTrack
         {
             get;
@@ -289,6 +314,12 @@ namespace AutomatedRodentTracker.ModelInterface.Results
             set;
         }
 
+        bool ResultsGenerated
+        {
+            get;
+            set;
+        }
+
         void GenerateResults();
         void GenerateResults(string file);
         PointF[] GetMotionTrack();
@@ -325,5 +356,7 @@ namespace AutomatedRodentTracker.ModelInterface.Results
             get;
             set;
         }
+
+        object[,] GetResults();
     }
 }

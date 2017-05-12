@@ -36,6 +36,7 @@ namespace AutomatedRodentTracker.Model.Results
         private double m_Velocity;
         private double m_AngularVelocity;
         private double m_Distance;
+        private double m_CentroidDistance;
         private double m_PelvicArea2;
         private double m_PelvicArea3;
         private double m_PelvicArea4;
@@ -286,6 +287,25 @@ namespace AutomatedRodentTracker.Model.Results
                 }
 
                 m_Distance = value;
+
+                MarkAsDirty();
+            }
+        }
+
+        public double CentroidDistance
+        {
+            get
+            {
+                return m_CentroidDistance;
+            }
+            set
+            {
+                if (Equals(m_CentroidDistance, value))
+                {
+                    return;
+                }
+
+                m_CentroidDistance = value;
 
                 MarkAsDirty();
             }
