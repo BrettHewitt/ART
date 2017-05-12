@@ -320,7 +320,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private void AddTgFolder()
         {
-            string folderLocation = FileBrowser.BrowseForFolder(@"F:\New folder\TestVids");
+            string folderLocation = FileBrowser.BrowseForFolder();
 
             if (string.IsNullOrWhiteSpace(folderLocation))
             {
@@ -527,7 +527,7 @@ namespace AutomatedRodentTracker.ViewModel.BatchProcess
 
         private void SetOutputFolder()
         {
-            string folderLocation = FileBrowser.BrowseForFolder(@"F:\New folder\");
+            string folderLocation = FileBrowser.BrowseForFolder();
 
             if (string.IsNullOrWhiteSpace(folderLocation))
             {
